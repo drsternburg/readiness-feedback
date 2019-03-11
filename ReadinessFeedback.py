@@ -76,7 +76,12 @@ class ReadinessFeedback(PygameFeedback):
         self.pause_every_x_events = 2
         self.end_after_x_events = 6
 
-        ########################################################################  
+        ######################################################################## 
+        # logic parameters
+        # self.max_history = 10
+        self.emg_history = []
+        self.eeg_history = []
+
 
 
     def pre_mainloop(self):
@@ -134,14 +139,38 @@ class ReadinessFeedback(PygameFeedback):
     def on_control_event(self, data):
         if self.on_trial:
             now = pygame.time.get_ticks()
+            self.emg_history.append(data['emg'])
+            self.eeg_history.append(data['cl_output'])
+            
             if data['pedal'] == 1:
+                # if pedal is press
                 self.pedal_press()
-            self.emg_state = data['emg']
-            self.cfy_output = data['cl_output']
+
+                # go to the EMG onset, and look at the time where it turns from 0 to 1
+                found = False
+                i = len(self.emg_history) - 2
+                while(not found) :
+                    if(self.emg_history[i+1] == 1 and self.emg_history[i] == 0):
+                        found = True
+                    i -= 1
+
+                # Then get the cfy_output.
+                if(len(self.eeg_history) > i -5):
+                    self.rp = self.eeg_history[i-5:i+1]
+                else:
+                    self.rp = self.eeg_history[:i+1]
+
+                # Restart the output
+                self.eeg_history = []
+                self.emg_history = []
+
         if self.paused:
             if data['pedal'] == 1:
                 self.unpause()
 
+    def get_current_rp(self):
+        # TODO: maybe to do more logic stuff here before sending back the RP. 
+        return self.rp
 
     def on_keyboard_event(self):
         self.process_pygame_events()
@@ -184,46 +213,6 @@ class ReadinessFeedback(PygameFeedback):
                 # self.draw_fixcross()
         pygame.display.update()
 
-    #  fill a surface with a gradient pattern
-    # Parameters:
-    # color -> starting color
-    # gradient -> final color
-    # rect -> area to fill; default is surface's rect
-    # vertical -> True=vertical; False=horizontal
-    # forward -> True=forward; False=reverse
-    
-    # Pygame recipe: http://www.pygame.org/wiki/GradientCode
-    def fill_gradient(self, surface, color, gradient, rect=None, vertical=True, forward=True):
-        if rect is None: rect = surface.get_rect()
-        x1,x2 = rect.left, rect.right
-        y1,y2 = rect.top, rect.bottom
-        if vertical: h = y2-y1
-        else:        h = x2-x1
-        if forward: a, b = color, gradient
-        else:       b, a = color, gradient
-        rate = (
-            float(b[0]-a[0])/h,
-            float(b[1]-a[1])/h,
-            float(b[2]-a[2])/h
-        )
-        fn_line = pygame.draw.line
-        if vertical:
-            for line in range(y1,y2):
-                color = (
-                    min(max(a[0]+(rate[0]*(line-y1)),0),255),
-                    min(max(a[1]+(rate[1]*(line-y1)),0),255),
-                    min(max(a[2]+(rate[2]*(line-y1)),0),255)
-                )
-                fn_line(surface, color, (x1,line), (x2,line))
-        else:
-            for col in range(x1,x2):
-                color = (
-                    min(max(a[0]+(rate[0]*(col-x1)),0),255),
-                    min(max(a[1]+(rate[1]*(col-x1)),0),255),
-                    min(max(a[2]+(rate[2]*(col-x1)),0),255)
-                )
-                fn_line(surface, color, (col,y1), (col,y2))
-
     def show_rect(self):
         # TODO: here a simple rectangle is drawn
 
@@ -264,7 +253,6 @@ class ReadinessFeedback(PygameFeedback):
             self.screen.blit(val, (
             ((self.screenSize[0] / self.bars_num) * (ind + 1)) -50, self.screenSize[1] - image_sizes[ind][1] - 150))
 
-
     def update_bars(self):
         image_size = 50
         new_bar = self.clf_input
@@ -297,6 +285,47 @@ class ReadinessFeedback(PygameFeedback):
     def log(self, print_str):
         now = pygame.time.get_ticks()
         print '[%4.2f sec] %s' % (now / 1000.0, print_str)
+
+
+    #  fill a surface with a gradient pattern
+    # Parameters:
+    # color -> starting color
+    # gradient -> final color
+    # rect -> area to fill; default is surface's rect
+    # vertical -> True=vertical; False=horizontal
+    # forward -> True=forward; False=reverse
+    
+    # Pygame recipe: http://www.pygame.org/wiki/GradientCode
+    def fill_gradient(self, surface, color, gradient, rect=None, vertical=True, forward=True):
+        if rect is None: rect = surface.get_rect()
+        x1,x2 = rect.left, rect.right
+        y1,y2 = rect.top, rect.bottom
+        if vertical: h = y2-y1
+        else:        h = x2-x1
+        if forward: a, b = color, gradient
+        else:       b, a = color, gradient
+        rate = (
+            float(b[0]-a[0])/h,
+            float(b[1]-a[1])/h,
+            float(b[2]-a[2])/h
+        )
+        fn_line = pygame.draw.line
+        if vertical:
+            for line in range(y1,y2):
+                color = (
+                    min(max(a[0]+(rate[0]*(line-y1)),0),255),
+                    min(max(a[1]+(rate[1]*(line-y1)),0),255),
+                    min(max(a[2]+(rate[2]*(line-y1)),0),255)
+                )
+                fn_line(surface, color, (x1,line), (x2,line))
+        else:
+            for col in range(x1,x2):
+                color = (
+                    min(max(a[0]+(rate[0]*(col-x1)),0),255),
+                    min(max(a[1]+(rate[1]*(col-x1)),0),255),
+                    min(max(a[2]+(rate[2]*(col-x1)),0),255)
+                )
+                fn_line(surface, color, (col,y1), (col,y2))
 
 
 if __name__ == "__main__":
