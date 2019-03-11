@@ -89,9 +89,7 @@ class ReadinessFeedback(PygameFeedback):
         self.idle_counter = 0
         self.pedalpress_counter = 0
         self.reset_trial_states()
-        # self.load_images()
-        self.on
-        _pause()
+        self.on_pause()
 
     def reset_trial_states(self):
         self.time_trial_end = float('infinity')
