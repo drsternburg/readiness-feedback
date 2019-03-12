@@ -82,7 +82,27 @@ class ReadinessFeedback(PygameFeedback):
         self.emg_history = []
         self.eeg_history = []
 
+        ######################################################################## 
+        # TESTING PURPOSES ONLY.
+        self.on_trial = True
+        self.paused = False
 
+    def test_inject_data(self):
+        # TESTING PURPOSES ONLY.
+        self.eeg_history = []
+        self.emg_history = []
+        self.test_data = []
+        for i in range(10):
+            self.test_data.append(dict(
+                emg=0,
+                cl_output=np.random.rand(),
+                pedal=0
+            ))
+        for i in range(5,10): 
+            self.test_data[i]['emg'] = 1
+        # feed the control event 
+        for i in range(10):
+            self.on_control_event(self.test_data[i])
 
     def pre_mainloop(self):
         PygameFeedback.pre_mainloop(self)
@@ -109,10 +129,8 @@ class ReadinessFeedback(PygameFeedback):
         self.this_prompt = False
         self.this_premature = False
 
-
     def post_mainloop(self):
         PygameFeedback.post_mainloop(self)
-
 
     def on_pause(self):
         self.log('Paused. Waiting for participant to continue...')
@@ -125,9 +143,10 @@ class ReadinessFeedback(PygameFeedback):
         self.log('Starting block ' + str(self.block_counter + 1))
         now = pygame.time.get_ticks()
         self.paused = False
+        self.on_trial = True
+        self.already_pressed = False
         self.time_trial_end = now
-        self.trial_counter -= 1
-
+        self.trial_counter -= 1 
 
     def tick(self):
         now = pygame.time.get_ticks()
@@ -135,32 +154,31 @@ class ReadinessFeedback(PygameFeedback):
             self.on_keyboard_event()
         self.present_stimulus()
 
-
     def on_control_event(self, data):
         if self.on_trial:
             now = pygame.time.get_ticks()
             self.emg_history.append(data['emg'])
             self.eeg_history.append(data['cl_output'])
-            
             if data['pedal'] == 1:
-                # if pedal is press
-                self.pedal_press()
+                # self.pedal_press()
 
+
+                # Maybe this whole chuck should be in the pedal_press function instead...
                 # go to the EMG onset, and look at the time where it turns from 0 to 1
                 found = False
-                i = len(self.emg_history) - 2
+                i = len(self.emg_history) - 2 #index position from last
                 while(not found) :
                     if(self.emg_history[i+1] == 1 and self.emg_history[i] == 0):
                         found = True
                     i -= 1
 
-                # Then get the cfy_output.
-                if(len(self.eeg_history) > i -5):
+                i = len(self.eeg_history) - i #change index position to the first
+                if(len(self.eeg_history) > i-5):
                     self.rp = self.eeg_history[i-5:i+1]
                 else:
                     self.rp = self.eeg_history[:i+1]
-
-                # Restart the output
+                print(self.get_current_rp())
+                # Restart the history
                 self.eeg_history = []
                 self.emg_history = []
 
@@ -170,29 +188,34 @@ class ReadinessFeedback(PygameFeedback):
 
     def get_current_rp(self):
         # TODO: maybe to do more logic stuff here before sending back the RP. 
-        return self.rp
+        return np.average(self.rp)
 
     def on_keyboard_event(self):
         self.process_pygame_events()
         if self.keypressed:
-            self.update_bar()
-            self.update_bars()
             if self.on_trial and not self.already_pressed and not self.this_prompt:
-                self.keypressed = False
                 self.pedal_press()
             if self.paused:
-                self.keypressed = False
                 self.unpause()
             if not self.on_trial:
-                self.keypressed = False
                 self.already_interrupted = False
-
-
+            self.keypressed = False
+            
+            
     def pedal_press(self):
-        self.already_pressed = True
         now = pygame.time.get_ticks()
         self.log('button press')
 
+        ####################### TESTING
+        self.test_inject_data()
+        self.on_control_event({'emg': 1, 'pedal':1, 'cl_output': np.random.rand()})
+        ####################### 
+
+
+        self.already_pressed = True
+        self.update_bar()
+        self.update_bars()
+        self.on_pause()
 
     def present_stimulus(self):
         self.screen.fill(self.background_color)
@@ -328,7 +351,7 @@ class ReadinessFeedback(PygameFeedback):
                 fn_line(surface, color, (col,y1), (col,y2))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     fb = ReadinessFeedback()
     fb.on_init()
     fb.on_play()
