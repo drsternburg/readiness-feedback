@@ -136,7 +136,7 @@ class Feedback(object):
         
         self.udp_markers_enable = False
         self.udp_markers_host = '127.0.0.1'
-        self.udp_markers_port = 1206
+        self.udp_markers_port = 12345
  
     #
     # Internal routines not inteded for overwriting
