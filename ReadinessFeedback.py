@@ -23,7 +23,8 @@ from FeedbackBase.PygameFeedback import PygameFeedback
 from __builtin__ import str
 from collections import deque
 import numpy as np
-
+import threading
+import time
 
 class ReadinessFeedback(PygameFeedback):
     
@@ -55,16 +56,7 @@ class ReadinessFeedback(PygameFeedback):
         self.marker_base_interruption = 20
         self.marker_trial_end = 30
         self.marker_prompt = 40
-
-        ########################################################################
-        # Parameters to the bars visuals
-        self.clf_input = 0
-        self.clf_input_prev = 0
-        self.dist = 0
-        self.stat_bar_loc = 0
-        self.bars_num = 15
-        self.bars_values = np.zeros((self.bars_num))
-        self.bars_colors = np.zeros((self.bars_num, 3))
+        
         ########################################################################
         # MAIN PARAMETERS TO BE SET IN MATLAB
 
@@ -74,9 +66,10 @@ class ReadinessFeedback(PygameFeedback):
 
         ######################################################################## 
         # logic parameters
-        # self.max_history = 10
         self.emg_history = []
         self.eeg_history = []
+        self.rp_history = []
+        self.last_cross_shown = pygame.time.get_ticks()
 
         ######################################################################## 
         # TESTING PURPOSES ONLY.
@@ -112,6 +105,7 @@ class ReadinessFeedback(PygameFeedback):
         self.pedalpress_counter = 0
         self.reset_trial_states()
         self.on_pause()
+        self.render_text(self.pause_text)
 
     def reset_trial_states(self):
         self.time_trial_end = float('infinity')
@@ -122,7 +116,6 @@ class ReadinessFeedback(PygameFeedback):
         self.redgreen_on = False
         self.already_interrupted = False
         self.already_interrupted_silent = False
-        self.already_pressed = False
         self.this_prompt = False
         self.this_premature = False
 
@@ -134,13 +127,14 @@ class ReadinessFeedback(PygameFeedback):
         self.time_trial_start = float('infinity')
         self.paused = True
         self.on_trial = False
+        self.render_text(self.pause_text)
 
     def unpause(self):
         self.log('Starting block ' + str(self.block_counter + 1))
         now = pygame.time.get_ticks()
+        self.draw_fixation_cross()
         self.paused = False
         self.on_trial = True
-        self.already_pressed = False
         self.time_trial_end = now
         self.trial_counter -= 1 
 
@@ -148,7 +142,6 @@ class ReadinessFeedback(PygameFeedback):
         now = pygame.time.get_ticks()
         if self.listen_to_keyboard:
             self.on_keyboard_event()
-        self.present_stimulus()
 
     def on_control_event(self, data):
         if self.on_trial and not self.paused:
@@ -163,13 +156,12 @@ class ReadinessFeedback(PygameFeedback):
             pass
             
     def get_current_rp(self):
-        # TODO: add more logic stuff here before sending back the RP. 
         return np.average(self.rp)
 
     def on_keyboard_event(self):
         self.process_pygame_events()
         if self.keypressed:
-            if self.on_trial and not self.already_pressed and not self.this_prompt:
+            if self.on_trial and not self.this_prompt:
                 self.pedal_press()
             if self.paused:
                 #### ONLY FOR TESTING
@@ -185,116 +177,63 @@ class ReadinessFeedback(PygameFeedback):
         now = pygame.time.get_ticks()
         self.log('pedal press')
 
-        found = False
-        i = len(self.emg_history) - 3 #index position from last
-        while(not found and not i <= 0) :
-            if(self.emg_history[i+1] == 1 and self.emg_history[i] == 0):
-                found = True
-            i -= 1
-
-        i = len(self.eeg_history) - i #change index position to the first
-        if(len(self.eeg_history) > i-5):
-            self.rp = self.eeg_history[i-5:i+1]
+        # restart the trial if they press it for less than 2 seconds
+        if(now - self.last_cross_shown < 2000):
+            self.draw_text("Too quick, retry again")
+            
         else: 
-            self.rp = self.eeg_history[:i+1]
-        print(self.rp)
-        print(self.get_current_rp())
+            self.pedalpress_counter += 1
+
+            # Calculating the RP based on EEG and EMG history
+            found = False
+            i = len(self.emg_history) - 3 #index position from last
+            while(not found and not i <= 0) :
+                if(self.emg_history[i+1] == 1 and self.emg_history[i] == 0):
+                    found = True
+                i -= 1
+
+            i = len(self.eeg_history) - i #change index position to the first
+            if(len(self.eeg_history) > i-5):
+                self.rp = self.eeg_history[i-5:i+1]
+            else: 
+                self.rp = self.eeg_history[:i+1]
+
+            #### ONLY FOR TESTING
+            self.add_ones = False
+            #######
+
+            # Present the RP value on screen
+            current_rp = str(self.get_current_rp)
+            self.rp_history.append(current_rp)
+
+            str_rp = str(np.random.rand(1)[0])
+            self.draw_text(str_rp)
+
+        pygame.time.delay(2000) #delay for 2 seconds then present the cross            
+        self.draw_fixation_cross()
         # Restart the history
         self.eeg_history = []
         self.emg_history = []
 
-        # Updates the UI and status.  
-        #### ONLY FOR TESTING
-        self.add_ones = False
-        #######
-        self.already_pressed = True
-        self.update_bar()
-        self.update_bars()
-        self.on_pause()
+    def draw_text(self, str_value):
+        t = threading.Thread(target = self.render_text, args=[str_value]) #runs it on another thread
+        t.start()
 
-    def present_stimulus(self):
+    def draw_fixation_cross(self):
         self.screen.fill(self.background_color)
-        # TODO: here a simple rectangle is drawn
-        self.show_rect()
-        self.show_bars()
-        if self.paused:
-            self.render_text(self.pause_text)
-        # else:
-            # if self.on_trial:
-                # if self.this_prompt:
-                #     self.render_text(self.prompt_text)
-                # else:
-                #     pass
-                    # self.show_trafficlight()
-            # else:
-            #     pass
-                # self.draw_fixcross()
+        vertical_line = pygame.Surface((2, 250))
+        horizontal_line = pygame.Surface((250, 2))
+        self.screen.blit(horizontal_line, (self.screen_center[0] - (250/2), self.screen_center[1]))
+        self.screen.blit(vertical_line, (self.screen_center[0], self.screen_center[1] - (250/2)))
         pygame.display.update()
-
-    def show_rect(self):
-        # TODO: here a simple rectangle is drawn
-
-        blue = (0, 0, 255)
-        red = (255, 0, 0)
-        green = (0, 255, 0)
-        grey = (0, 0, 0)
-        recct = pygame.Surface((800, 50))
-        # recct.fill(blue)
-        self.fill_gradient(recct,  green,red, vertical=False)
-        image_size = recct.get_size()
-
-        rectt_small = pygame.Surface((50, 100))
-        rectt_small.fill(grey)
-        rectt_small_size = rectt_small.get_size()
-        self.clf_input = np.random.rand(1)
-        self.dist = (2 * self.clf_input[0] - 1) * image_size[0] / 2
-        rectt_small_stat = pygame.Surface((50, 100))
-        rectt_small_stat.fill( self.bars_colors[-1])
-        rectt_small_stat_size = rectt_small_stat.get_size()
-
-        # dist = np.random.choice([-1,1])*image_size[0]/2
-        # self.screen.blit(recct,((self.screenSize[0] / 2 - image_size[0] / 2), (self.screenSize[1] / 2 - image_size[1] / 2)))
-        self.screen.blit(recct, ((self.screenSize[0] / 2 - image_size[0] / 2), self.screenSize[1] - 500))
-        self.screen.blit(rectt_small, (
-            (self.screenSize[0] / 2 - rectt_small_size[0] / 2) + self.clf_input_prev, self.screenSize[1] - image_size[1] / 2 - 500))
-        self.screen.blit(rectt_small_stat, ((self.screenSize[0] / 2 - rectt_small_size[0] / 2) + self.stat_bar_loc,
-                                            self.screenSize[1] - image_size[1] / 2 - 500))
-
-    def show_bars(self):
-        bar_width = 20
-
-        bar_max_length = 100
-        recct = [pygame.Surface((bar_width, np.int(i*bar_max_length ))) for i in self.bars_values]
-        image_sizes = [i.get_size() for i in recct]
-        for ind, val in enumerate(recct):
-            val.fill(self.bars_colors[ind])
-            self.screen.blit(val, (
-            ((self.screenSize[0] / self.bars_num) * (ind + 1)) -50, self.screenSize[1] - image_sizes[ind][1] - 150))
-
-    def update_bars(self):
-        image_size = 50
-        new_bar = self.clf_input
-        if new_bar >= self.bars_values[-1]:
-            color = (255, 0, 0)
-        if new_bar < self.bars_values[-1]:
-            color = (0, 255, 0)
-        self.bars_values = np.append( self.bars_values[1:],[new_bar])
-        self.bars_colors = np.append(self.bars_colors[1:,:],[color],  axis=0)
-
-        # self.bars_colors[0,:]=color
-        # self.bars_values = np.random.random((self.bars_num))
-
-
-    def update_bar(self):
-        self.clf_input_prev = self.stat_bar_loc
-        self.stat_bar_loc = self.dist
-
+        self.last_cross_shown = pygame.time.get_ticks()
 
     def render_text(self, text):
+        self.screen.fill(self.background_color)
         disp_text = self.font_text.render(text, 0, self.text_color)
         textsize = disp_text.get_rect()
-        self.screen.blit(disp_text, (self.screen_center[0] - textsize[2] / 2, self.screen_center[1] - textsize[3] / 2 -100))
-
+        self.screen.blit(disp_text, (self.screen_center[0] - textsize[2] / 2, self.screen_center[1] - textsize[3] / 2))
+        pygame.display.update()
 
     def send_parallel_log(self, event):
         self.send_parallel(event)
@@ -303,48 +242,6 @@ class ReadinessFeedback(PygameFeedback):
     def log(self, print_str):
         now = pygame.time.get_ticks()
         print '[%4.2f sec] %s' % (now / 1000.0, print_str)
-
-
-    #  fill a surface with a gradient pattern
-    # Parameters:
-    # color -> starting color
-    # gradient -> final color
-    # rect -> area to fill; default is surface's rect
-    # vertical -> True=vertical; False=horizontal
-    # forward -> True=forward; False=reverse
-    
-    # Pygame recipe: http://www.pygame.org/wiki/GradientCode
-    def fill_gradient(self, surface, color, gradient, rect=None, vertical=True, forward=True):
-        if rect is None: rect = surface.get_rect()
-        x1,x2 = rect.left, rect.right
-        y1,y2 = rect.top, rect.bottom
-        if vertical: h = y2-y1
-        else:        h = x2-x1
-        if forward: a, b = color, gradient
-        else:       b, a = color, gradient
-        rate = (
-            float(b[0]-a[0])/h,
-            float(b[1]-a[1])/h,
-            float(b[2]-a[2])/h
-        )
-        fn_line = pygame.draw.line
-        if vertical:
-            for line in range(y1,y2):
-                color = (
-                    min(max(a[0]+(rate[0]*(line-y1)),0),255),
-                    min(max(a[1]+(rate[1]*(line-y1)),0),255),
-                    min(max(a[2]+(rate[2]*(line-y1)),0),255)
-                )
-                fn_line(surface, color, (x1,line), (x2,line))
-        else:
-            for col in range(x1,x2):
-                color = (
-                    min(max(a[0]+(rate[0]*(col-x1)),0),255),
-                    min(max(a[1]+(rate[1]*(col-x1)),0),255),
-                    min(max(a[2]+(rate[2]*(col-x1)),0),255)
-                )
-                fn_line(surface, color, (col,y1), (col,y2))
-
 
 if __name__ == '__main__':
     fb = ReadinessFeedback()
