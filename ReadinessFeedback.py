@@ -43,10 +43,14 @@ class ReadinessFeedback(PygameFeedback):
         self.text_color = [64, 64, 64]
         self.char_fontsize = 100
         self.char_color = [0, 0, 0]
+        self.white_color = [255,255,255]
+        self.red_color = [225, 0, 0]
+        self.radius = 100
 
-        self.pause_text = 'Pause. Press pedal to continue...'
+        self.pause_text = 'Press pedal to start...'
         self.paused = True
         self.on_trial = False
+        self.on_training = True #This is used to control the offline or online stage. 
 
         ########################################################################
 
@@ -71,6 +75,7 @@ class ReadinessFeedback(PygameFeedback):
         self.eeg_history = []
         self.rp_history = []
         self.last_cross_shown = pygame.time.get_ticks()
+        self.last_circle_shown = pygame.time.get_ticks()
 
     def pre_mainloop(self):
         PygameFeedback.pre_mainloop(self)
@@ -110,11 +115,11 @@ class ReadinessFeedback(PygameFeedback):
     def unpause(self):
         self.log('Starting block ' + str(self.block_counter + 1))
         now = pygame.time.get_ticks()
-        self.draw_fixation_cross()
         self.paused = False
         self.on_trial = True
         self.time_trial_end = now
         self.trial_counter -= 1 
+        self.present_stimulus()
 
     def tick(self):
         now = pygame.time.get_ticks()
@@ -155,44 +160,61 @@ class ReadinessFeedback(PygameFeedback):
         self.log('pedal press')
 
         # restart the trial if they press it for less than 2 seconds
-        if(now - self.last_cross_shown < 2000):
+        if(now - self.last_circle_shown < 2000):
             self.draw_text("Too quick, retry again")
             
         else: 
+            threading.Thread(target = self.draw_circle, args=[self.red_color]).start() #presents red circle
+            pygame.time.delay(1000) #delay for 1 second    
+
             self.pedalpress_counter += 1
 
-            # Calculating the RP based on EEG and EMG history
-            found = False
-            i = len(self.emg_history) - 3 #index position from last
-            while(not found and not i <= 0) :
-                if(self.emg_history[i+1] == 1 and self.emg_history[i] == 0):
-                    found = True
-                i -= 1
+            if self.on_training:
+                pass
+            else:
+                # Calculating the RP based on EEG and EMG history
+                found = False
+                i = len(self.emg_history) - 3 #index position from last
+                while(not found and not i <= 0) :
+                    if(self.emg_history[i+1] == 1 and self.emg_history[i] == 0):
+                        found = True
+                    i -= 1
 
-            i = len(self.eeg_history) - i #change index position to the first
-            if(len(self.eeg_history) > i-5):
-                self.rp = self.eeg_history[i-5:i+1]
-            else: 
-                self.rp = self.eeg_history[:i+1]
+                i = len(self.eeg_history) - i #change index position to the first
+                if(len(self.eeg_history) > i-5):
+                    self.rp = self.eeg_history[i-5:i+1]
+                else: 
+                    self.rp = self.eeg_history[:i+1]
 
-            # Present the RP value on screen
-            current_rp = str(self.get_current_rp)
-            self.rp_history.append(current_rp)
+                # Present the RP value on screen
+                current_rp = str(self.get_current_rp)
+                self.rp_history.append(current_rp)
 
-            # str_rp = str(np.random.rand(1)[0])
-            str_rp = str(self.get_current_rp())
+                # str_rp = str(np.random.rand(1)[0])
+                str_rp = str(self.get_current_rp())
 
-            self.draw_text(str_rp)
+                self.draw_text(str_rp)
+                pygame.time.delay(2000) #delay for 2 seconds then present the cross            
 
-        pygame.time.delay(2000) #delay for 2 seconds then present the cross            
-        self.draw_fixation_cross()
+        self.present_stimulus()
         # Restart the history
         self.eeg_history = []
         self.emg_history = []
 
+    def present_stimulus(self):
+        threading.Thread(target = self.draw_fixation_cross).start() #draw cross
+        pygame.time.delay(2500) #delay for 2.5 seconds then white circle         
+        threading.Thread(target = self.draw_circle, args=[self.white_color]).start() #draw white circle
+
     def draw_text(self, str_value):
         t = threading.Thread(target = self.render_text, args=[str_value]) #runs it on another thread
         t.start()
+
+    def draw_circle(self, color):
+        self.screen.fill(self.background_color)
+        pygame.draw.circle(self.screen, color, (self.screen_center[0], self.screen_center[1]), self.radius)
+        pygame.display.update()
+        self.last_circle_shown = pygame.time.get_ticks()
 
     def draw_fixation_cross(self):
         self.screen.fill(self.background_color)
