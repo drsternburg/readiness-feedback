@@ -56,7 +56,7 @@ class ReadinessFeedback(PygameFeedback):
         self.marker_base_interruption = 20
         self.marker_trial_end = 30
         self.marker_prompt = 40
-        
+
         ########################################################################
         # MAIN PARAMETERS TO BE SET IN MATLAB
 
@@ -64,35 +64,13 @@ class ReadinessFeedback(PygameFeedback):
         self.pause_every_x_events = 2
         self.end_after_x_events = 6
 
-        ######################################################################## 
+        ########################################################################
+
         # logic parameters
         self.emg_history = []
         self.eeg_history = []
         self.rp_history = []
         self.last_cross_shown = pygame.time.get_ticks()
-
-        ######################################################################## 
-        # TESTING PURPOSES ONLY.
-        self.add_ones = False
-        # self.on_trial = True
-        # self.paused = False
-
-    def test_inject_data(self):
-        # TESTING PURPOSES ONLY.
-        self.eeg_history = []
-        self.emg_history = []
-        self.test_data = []
-        for i in range(10):
-            self.test_data.append(dict(
-                emg=0,
-                cl_output=np.random.rand(),
-                pedal=0
-            ))
-        for i in range(5,10): 
-            self.test_data[i][u'emg'] = 1
-        # feed the control event 
-        for i in range(10):
-            self.on_control_event(self.test_data[i])
 
     def pre_mainloop(self):
         PygameFeedback.pre_mainloop(self)
@@ -146,11 +124,13 @@ class ReadinessFeedback(PygameFeedback):
     def on_control_event(self, data):
         if self.on_trial and not self.paused:
             now = pygame.time.get_ticks()
-            if self.add_ones:
-                self.emg_history.append(1)
-            else:
+            if u'emg' in data:
                 self.emg_history.append(data[u'emg'])
-            self.eeg_history.append(data[u'cl_output'])
+            if u'cl_output' in data:
+                self.eeg_history.append(data[u'cl_output'])
+            if u'pedal' in data:
+                if data[u'pedal'] == 1:
+                    self.pedal_press()
         else:
             # not sure what to do here... 
             pass
@@ -164,9 +144,6 @@ class ReadinessFeedback(PygameFeedback):
             if self.on_trial and not self.this_prompt:
                 self.pedal_press()
             if self.paused:
-                #### ONLY FOR TESTING
-                self.add_ones = True
-                #######
                 self.unpause()
             if not self.on_trial:
                 self.already_interrupted = False
@@ -198,15 +175,13 @@ class ReadinessFeedback(PygameFeedback):
             else: 
                 self.rp = self.eeg_history[:i+1]
 
-            #### ONLY FOR TESTING
-            self.add_ones = False
-            #######
-
             # Present the RP value on screen
             current_rp = str(self.get_current_rp)
             self.rp_history.append(current_rp)
 
-            str_rp = str(np.random.rand(1)[0])
+            # str_rp = str(np.random.rand(1)[0])
+            str_rp = str(self.get_current_rp())
+
             self.draw_text(str_rp)
 
         pygame.time.delay(2000) #delay for 2 seconds then present the cross            
