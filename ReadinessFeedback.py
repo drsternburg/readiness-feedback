@@ -127,18 +127,15 @@ class ReadinessFeedback(PygameFeedback):
             self.on_keyboard_event()
 
     def on_control_event(self, data):
-        if self.on_trial and not self.paused:
+        if self.on_trial and not self.paused and not self.on_training:
             now = pygame.time.get_ticks()
             if u'emg' in data:
                 self.emg_history.append(data[u'emg'])
             if u'cl_output' in data:
                 self.eeg_history.append(data[u'cl_output'])
-            if u'pedal' in data:
-                if data[u'pedal'] == 1:
-                    self.pedal_press()
-        else:
-            # not sure what to do here... 
-            pass
+
+        if u'pedal' in data and data[u'pedal'] == 1.0 and not self.paused:
+            self.pedal_press()
             
     def get_current_rp(self):
         return np.average(self.rp)
