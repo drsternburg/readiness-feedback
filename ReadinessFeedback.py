@@ -50,7 +50,9 @@ class ReadinessFeedback(PygameFeedback):
         self.pause_text = 'Press pedal to start...'
         self.paused = True
         self.on_trial = False
-        self.on_training = True #This is used to control the offline or online stage. 
+        self.on_training = False #This is used to control the offline or online stage. 
+        self.training_counter = 0
+        self.max_trial_training = 100
 
         ########################################################################
 
@@ -167,7 +169,10 @@ class ReadinessFeedback(PygameFeedback):
             self.pedalpress_counter += 1
 
             if self.on_training:
-                pass
+                self.training_counter +=1
+                if self.training_counter == self.max_trial_training :
+                    self.draw_text("Finished training...")
+                    return
             else:
                 # Calculating the RP based on EEG and EMG history
                 found = False
@@ -187,8 +192,8 @@ class ReadinessFeedback(PygameFeedback):
                 current_rp = str(self.get_current_rp)
                 self.rp_history.append(current_rp)
 
-                # str_rp = str(np.random.rand(1)[0])
-                str_rp = str(self.get_current_rp())
+                str_rp = str(np.random.rand(1)[0])
+                # str_rp = str(self.get_current_rp())
 
                 self.draw_text(str_rp)
                 pygame.time.delay(2000) #delay for 2 seconds then present the cross            
