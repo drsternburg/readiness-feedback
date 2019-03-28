@@ -50,7 +50,7 @@ class ReadinessFeedback(PygameFeedback):
         self.pause_text = 'Press pedal to start...'
         self.paused = True
         self.on_trial = False
-        self.on_training = False #This is used to control the offline or online stage. 
+        self.on_training = True #This is used to control the offline or online stage. 
         self.training_counter = 0
         self.max_trial_training = 100
 
@@ -140,7 +140,8 @@ class ReadinessFeedback(PygameFeedback):
             self.pedal_press()
             
     def get_current_rp(self):
-        return np.average(self.rp)
+        # return np.average(self.rp)
+        return self.rp
 
     def on_keyboard_event(self):
         self.process_pygame_events()
@@ -183,19 +184,19 @@ class ReadinessFeedback(PygameFeedback):
                     i -= 1
 
                 i = len(self.eeg_history) - i #change index position to the first
-                if(len(self.eeg_history) > i-5):
-                    self.rp = self.eeg_history[i-5:i+1]
-                else: 
-                    self.rp = self.eeg_history[:i+1]
+                self.rp = self.eeg_history[i]
+                # if(len(self.eeg_history) > i-5):
+                #     self.rp = self.eeg_history[i-5:i+1]
+                # else: 
+                #     self.rp = self.eeg_history[:i+1]
 
                 # Present the RP value on screen
-                current_rp = str(self.get_current_rp)
+                current_rp = str(self.get_current_rp())
                 self.rp_history.append(current_rp)
 
                 str_rp = str(np.random.rand(1)[0])
-                # str_rp = str(self.get_current_rp())
 
-                self.draw_text(str_rp)
+                self.draw_text(str_rp) #TODO: change into current_rp. 
                 pygame.time.delay(2000) #delay for 2 seconds then present the cross            
 
         self.present_stimulus()
