@@ -23,6 +23,8 @@ from FeedbackBase.PygameFeedback import PygameFeedback
 from __builtin__ import str
 from collections import deque
 import numpy as np
+import scipy.stats as stats
+import matplotlib.pyplot as plt
 import threading
 import time
 
@@ -50,7 +52,7 @@ class ReadinessFeedback(PygameFeedback):
         self.pause_text = 'Press pedal to start...'
         self.paused = True
         self.on_trial = False
-        self.on_training = True #This is used to control the offline or online stage. 
+        self.on_training = False #This is used to control the offline or online stage. 
         self.training_counter = 0
         self.max_trial_training = 100
 
@@ -78,6 +80,18 @@ class ReadinessFeedback(PygameFeedback):
         self.rp_history = []
         self.last_cross_shown = pygame.time.get_ticks()
         self.last_circle_shown = pygame.time.get_ticks()
+
+        #########################################################################
+        self.first_100_eeg = [3.40158,5.91582,8.72199,2.09857,1.57752,2.13866,1.31238,0.6742,-0.860305,0.869217,-2.20397,-0.427483,3.09122,-3.15091,6.29236,3.96954,-2.99037,-0.372976,3.0263,3.8923,-0.655221,1.86118,2.16084,-0.00743317,-10.7251,0.493279,0.844872,2.12802,4.46754,2.9867,2.67655,4.06675,1.01152,2.13234,3.17019,-0.483233,2.92781,3.2214,-3.94281,-1.15404,4.38632,1.29367,4.01247,-0.0690076,6.65976,6.36116,-0.479293,6.05266,5.24286,4.2689,-3.3575,4.44705,1.55116,2.94615,2.08329,4.34001,2.62014,5.26946,1.24628,2.23645,1.19922,-0.454266,5.87512,4.72588,6.4719,6.14339,6.07847,8.75295,7.29186,5.12702,11.5874,1.30933,1.30272,-1.92392,-2.79681,0.776014,7.42855,0.952247,-0.469118,5.27124,3.45942,1.59118,3.96028,3.67294,3.03981,1.52358,2.41185,2.48132,2.03066,6.84007,4.25418,3.03598,2.84473,3.6167,1.53169,6.81807,2.31844,1.12883]
+        self.first_100_eeg = sorted(self.first_100_eeg)
+        self.mu = np.average(self.first_100_eeg)
+        self.std = np.std(self.first_100_eeg)
+        self.one_std_val = 25
+        self.mean_value = 50
+        # pdf = stats.norm.pdf(self.first_100_eeg, mu, std)
+        # plt.plot(self.first_100_eeg, pdf)
+        # plt.show()
+
 
     def pre_mainloop(self):
         PygameFeedback.pre_mainloop(self)
@@ -140,8 +154,9 @@ class ReadinessFeedback(PygameFeedback):
             self.pedal_press()
             
     def get_current_rp(self):
-        # return np.average(self.rp)
-        return self.rp
+        self.rp_history.append(self.rp) #TODO: Should I append the z-score value, or the original value? 
+        z_score = (self.rp - self.mu) / self.std
+        return self.one_std_val * z_score + self.mean_value
 
     def on_keyboard_event(self):
         self.process_pygame_events()
@@ -191,12 +206,7 @@ class ReadinessFeedback(PygameFeedback):
                 #     self.rp = self.eeg_history[:i+1]
 
                 # Present the RP value on screen
-                current_rp = str(self.get_current_rp())
-                self.rp_history.append(current_rp)
-
-                str_rp = str(np.random.rand(1)[0])
-
-                self.draw_text(str_rp) #TODO: change into current_rp. 
+                self.draw_text(str(self.get_current_rp())) 
                 pygame.time.delay(2000) #delay for 2 seconds then present the cross            
 
         self.present_stimulus()
