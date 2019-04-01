@@ -25,6 +25,7 @@ from collections import deque
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+import math
 import threading
 import time
 
@@ -153,10 +154,15 @@ class ReadinessFeedback(PygameFeedback):
         if u'pedal' in data and data[u'pedal'] == 1.0 and not self.paused:
             self.pedal_press()
             
-    def get_current_rp(self):
-        self.rp_history.append(self.rp) #TODO: Should I append the z-score value, or the original value? 
-        z_score = (self.rp - self.mu) / self.std
-        return self.one_std_val * z_score + self.mean_value
+    def transform_rp(self, rp):
+        z_score = (rp - self.mu) / self.std
+        return int(round(self.one_std_val * z_score + self.mean_value))
+
+    def write_to_file(self, content):
+        f = open("rp-test.txt", "a")
+        f.write(content)
+        f.write("\n")
+        f.close()
 
     def on_keyboard_event(self):
         self.process_pygame_events()
@@ -177,6 +183,7 @@ class ReadinessFeedback(PygameFeedback):
         # restart the trial if they press it for less than 2 seconds
         if(now - self.last_circle_shown < 2000):
             self.draw_text("Too quick, retry again")
+            pygame.time.delay(1000) #delay for 1 second      
             
         else: 
             threading.Thread(target = self.draw_circle, args=[self.red_color]).start() #presents red circle
@@ -199,14 +206,16 @@ class ReadinessFeedback(PygameFeedback):
                     i -= 1
 
                 i = len(self.eeg_history) - i #change index position to the first
-                self.rp = self.eeg_history[i]
-                # if(len(self.eeg_history) > i-5):
-                #     self.rp = self.eeg_history[i-5:i+1]
-                # else: 
-                #     self.rp = self.eeg_history[:i+1]
+                # rp = self.eeg_history[i]
+                rp = np.random.uniform(np.min(self.first_100_eeg), np.max(self.first_100_eeg), 1)[0]
 
+                rp_val_transformed = self.transform_rp(rp)
+
+                # write to file, the necessary info about the rp
+                content_to_write = self.log(" | " + str(rp) + " | " + str(rp_val_transformed))
+                self.write_to_file(content_to_write)
                 # Present the RP value on screen
-                self.draw_text(str(self.get_current_rp())) 
+                self.draw_text(str(rp_val_transformed)) 
                 pygame.time.delay(2000) #delay for 2 seconds then present the cross            
 
         self.present_stimulus()
@@ -251,7 +260,9 @@ class ReadinessFeedback(PygameFeedback):
 
     def log(self, print_str):
         now = pygame.time.get_ticks()
-        print '[%4.2f sec] %s' % (now / 1000.0, print_str)
+        log = '[%4.2f sec] %s' % (now / 1000.0, print_str)
+        print(log)
+        return log
 
 if __name__ == '__main__':
     fb = ReadinessFeedback()
