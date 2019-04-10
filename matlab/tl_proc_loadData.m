@@ -36,7 +36,7 @@ fprintf('Loading data set %s, %s...\n',ds_name,phase_name)
 if nargout>1 || not(exist(filename_mrk,'file'))
     [cnt,mrk,mnt] = file_loadMatlab(filename_eeg);
     mnt.scale_box = [];
-    mnt = mnt_scalpToGrid(mnt);
+%     mnt = mnt_scalpToGrid(mnt);
 end
 if exist(filename_mrk,'file')
     load(filename_mrk)

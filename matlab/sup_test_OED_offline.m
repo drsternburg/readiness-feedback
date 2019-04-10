@@ -1,6 +1,6 @@
 
-%[mrk,cnt] = tl_proc_loadData(subjs_all{17},'Phase1');
-load TrafficLight_Phase1_VPtat.mat
+[mrk,cnt] = tl_proc_loadData('VPtat', 'Phase1');
+% load TrafficLight_Phase1_VPtat.mat
 
 %%
 global opt
@@ -34,6 +34,20 @@ fv = proc_variance(fv);
 fv = proc_logarithm(fv);
 opt.acq.C_emg = train_RLDAshrink(fv.x,fv.y);
 
+% %% pyff related stuff
+% BTB.Acq.IoAddr = 8888;
+% s.cout = cout;
+% pyff('startup'); pause(10);
+% pyff('init', 'ReadinessFeedback'); pause(10);
+% pyff('set', s); pause(10);
+% pyff('play'); pause(6);
+
+
 %%
 bbci = sup_bbci_setup_offline(cnt,mrk);
 bbci_apply(bbci);
+
+
+
+
+

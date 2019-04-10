@@ -6,7 +6,8 @@ global opt
 bbci = struct;
 
 bbci.source.acquire_fcn = @bbci_acquire_offline;
-bbci.source.acquire_param = {cnt,mrk,'blocksize',10,'realtime',0};
+bbci.source.acquire_param = {cnt,mrk,'blocksize',10,'realtime', 1};
+bbci.log.clock = 1;
 bbci.source.min_blocklength = 0;
 
 bbci.signal(1).source = 1;
@@ -47,16 +48,15 @@ bbci.control(3).fcn = @sup_bbci_control_emg;
 bbci.control(3).param = {opt};
 
 bbci.feedback(1).control= 1;
-bbci.feedback(1).receiver= '';
+bbci.feedback(1).receiver= 'pyff';
 bbci.feedback(2).control= 2;
-bbci.feedback(2).receiver= '';
+bbci.feedback(2).receiver= 'pyff';
 bbci.feedback(3).control= 3;
-bbci.feedback(3).receiver= '';
+bbci.feedback(3).receiver= 'pyff';
 
 bbci.quit_condition.marker = -255;
 
-bbci.log.output = 'screen&file';
-bbci.log.filebase = '~/bbci/log/log';
+% bbci.log.output = 'screen';
+% bbci.log.filebase = '~/bbci/log/log';
 bbci.log.classifier = 1;
-
 
