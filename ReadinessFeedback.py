@@ -27,6 +27,7 @@ import scipy.stats as stats
 import math
 import threading
 import time
+import datetime
 
 class ReadinessFeedback(PygameFeedback):
     
@@ -48,7 +49,7 @@ class ReadinessFeedback(PygameFeedback):
         self.white_color = [255,255,255]
         self.red_color = [225, 0, 0]
         self.radius = 100
-
+ 
         self.pause_text = 'Press pedal to start...'
         self.paused = True
         self.on_trial = False
@@ -82,6 +83,11 @@ class ReadinessFeedback(PygameFeedback):
         self.last_circle_shown = pygame.time.get_ticks()
         self.one_std_val = 25
         self.mean_value = 50
+
+        self.rp_dist_init = [3.40158,5.91582,8.72199,2.09857,1.57752,2.13866,1.31238,0.6742,-0.860305,0.869217,-2.20397,-0.427483,3.09122,-3.15091,6.29236,3.96954,-2.99037,-0.372976,3.0263,3.8923,-0.655221,1.86118,2.16084,-0.00743317,-10.7251,0.493279,0.844872,2.12802,4.46754,2.9867,2.67655,4.06675,1.01152,2.13234,3.17019,-0.483233,2.92781,3.2214,-3.94281,-1.15404,4.38632,1.29367,4.01247,-0.0690076,6.65976,6.36116,-0.479293,6.05266,5.24286,4.2689,-3.3575,4.44705,1.55116,2.94615,2.08329,4.34001,2.62014,5.26946,1.24628,2.23645,1.19922,-0.454266,5.87512,4.72588,6.4719,6.14339,6.07847,8.75295,7.29186,5.12702,11.5874,1.30933,1.30272,-1.92392,-2.79681,0.776014,7.42855,0.952247,-0.469118,5.27124,3.45942,1.59118,3.96028,3.67294,3.03981,1.52358,2.41185,2.48132,2.03066,6.84007,4.25418,3.03598,2.84473,3.6167,1.53169,6.81807,2.31844,1.12883]
+        self.rp_dist_init = sorted(self.rp_dist_init)
+        self.mu = np.average(self.rp_dist_init)
+        self.std = np.std(self.rp_dist_init)
         
     def pre_mainloop(self):
         PygameFeedback.pre_mainloop(self)
@@ -131,6 +137,7 @@ class ReadinessFeedback(PygameFeedback):
             self.on_keyboard_event()
 
     def on_control_event(self, data):
+
         if u'interaction-signal' in data: #This is on init only, we would then find the mean and the std of the training data. 
             set_data = data[u'interaction-signal'][1]
             self.rp_dist_init = sorted(set_data[len(set_data)/2:])
@@ -138,12 +145,19 @@ class ReadinessFeedback(PygameFeedback):
             self.std = np.std(self.rp_dist_init)
 
         if self.on_trial and not self.paused and not self.on_training and not self.searching_rp:
-            now = pygame.time.get_ticks()
-            # TODO: Append a dictionary of the Mrk_time as well
+            now = datetime.datetime.utcnow().strftime('%H:%M:%S.%f')[:-3]
             if u'emg' in data:
-                self.emg_history.append(data[u'emg'])
+                self.emg_history.append({
+                    'data': data[u'emg'],
+                    'matlab_timestamp': data[u'timestamp'],
+                    'pyff_timestamp': now
+                })
             if u'cl_output' in data:
-                self.eeg_history.append(data[u'cl_output'])
+                self.eeg_history.append({
+                    'data': data[u'cl_output'],
+                    'matlab_timestamp': data[u'timestamp'],
+                    'pyff_timestamp': now
+                })
 
         if u'pedal' in data and data[u'pedal'] == 1.0 and not self.paused:
             self.pedal_press()
@@ -168,8 +182,7 @@ class ReadinessFeedback(PygameFeedback):
             if not self.on_trial:
                 self.already_interrupted = False
             self.keypressed = False
-            
-            
+        
     def pedal_press(self):
         now = pygame.time.get_ticks()
         self.log('pedal press')
@@ -191,21 +204,27 @@ class ReadinessFeedback(PygameFeedback):
 
                 if not self.on_training:
                     # Calculating the RP based on EEG and EMG history
-                    index_emg_onset = self.check_emg_onset()
+                    index_emg_onset, pedal_timestamp_str = self.check_emg_onset()
                     if index_emg_onset == -1: # meaning there is an error in the EMG onset
                         self.trial_counter -=1 #doesn't count as a trial
 
                         self.draw_text("Movemnt too quick/slow")
                         pygame.time.delay(1000) #delay for 1 second  
                     else:
-                        rp = self.eeg_history[index_emg_onset]
+                        rp = self.eeg_history[index_emg_onset]['data']
                         # rp = np.random.uniform(np.min(self.rp_dist_init), np.max(self.rp_dist_init), 1)[0]
                         rp_val_transformed = self.transform_rp(rp)
 
                         # write to file, the necessary info about the rp
-                        content_to_write = self.log("Trial: " + str(self.trial_counter) + " | " + str(rp) + " | " + str(rp_val_transformed))
-                        self.write_to_file(content_to_write)
+                        content_to_write = self.log(
+                            "Trial: " + str(self.trial_counter) +
+                            " | " + str(rp) + 
+                            " | " + str(rp_val_transformed) + 
+                            " | " + pedal_timestamp_str + 
+                            " | " + self.eeg_history[index_emg_onset]['matlab_timestamp'] + 
+                            " | " + self.eeg_history[index_emg_onset]['pyff_timestamp']) 
 
+                        self.write_to_file(content_to_write)
                         # Present the RP value on screen
                         self.draw_text(str(rp_val_transformed)) 
                         pygame.time.delay(2000) #delay for 2 seconds then present the cross         
@@ -232,17 +251,25 @@ class ReadinessFeedback(PygameFeedback):
     def check_emg_onset(self): 
         self.searching_rp = True #Prevents messing up with the index of the array by adding more things. 
         found = False
-        i = len(self.emg_history) - 3 #index position from last.
+        total_size = len(self.emg_history)
+        i = total_size - 3 #index position from back.
+        return_index = -1
+        pedal_timestamp_str = ''
         while(not found and not i <= 0) :
-            if(self.emg_history[i+1] == 1 and self.emg_history[i] == 0):
+            if(self.emg_history[i+1]['data'] == 1 and self.emg_history[i]['data'] == 0):
                 found = True
+                return_index = i #change index position to the first
                 self.searching_rp = False
                 # check if the difference between emg onset and pedal press makes sense
                 # between 100 ms and 1 s
-                if len(self.emg_history) - i < 10 or len(self.emg_history) - i > 100:
-                    return -1 
+                # Substring -6 to get the last six digits SS:FFF
+                onset_timestamp = float(self.eeg_history[return_index]['matlab_timestamp'][-6:]) * 1000
+                pedal_timestamp_str = self.eeg_history[total_size - 1]['matlab_timestamp']
+                pedal_timestamp = float(pedal_timestamp_str[-6:]) * 1000
+                if pedal_timestamp - onset_timestamp > 1000 or pedal_timestamp - onset_timestamp < 100:
+                    return_index = -1 
             i -= 1
-        return len(self.eeg_history) - i #change index position to the first
+        return return_index, pedal_timestamp_str
 
     def present_stimulus(self):
         threading.Thread(target = self.draw_fixation_cross).start() #draw cross
@@ -281,7 +308,7 @@ class ReadinessFeedback(PygameFeedback):
 
     def log(self, print_str):
         now = pygame.time.get_ticks()
-        log = '[%4.2f sec] %s' % (now / 1000.0, print_str)
+        log = '[%4.3f sec] %s' % (now / 1000.0, print_str)
         print(log)
         return log
 
