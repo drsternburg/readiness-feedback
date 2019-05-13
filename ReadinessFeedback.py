@@ -137,7 +137,8 @@ class ReadinessFeedback(PygameFeedback):
             self.on_keyboard_event()
 
     def on_control_event(self, data):
-
+        
+        # TODO: Get the name of the file to be logged.
         if u'interaction-signal' in data: #This is on init only, we would then find the mean and the std of the training data. 
             set_data = data[u'interaction-signal'][1]
             self.rp_dist_init = sorted(set_data[len(set_data)/2:])
@@ -204,7 +205,7 @@ class ReadinessFeedback(PygameFeedback):
 
                 if not self.on_training:
                     # Calculating the RP based on EEG and EMG history
-                    index_emg_onset, pedal_timestamp_str = self.check_emg_onset()
+                    index_emg_onset, pedal_timestamp_str, press_onset_diff= self.check_emg_onset()
                     if index_emg_onset == -1: # meaning there is an error in the EMG onset
                         self.trial_counter -=1 #doesn't count as a trial
 
@@ -220,9 +221,10 @@ class ReadinessFeedback(PygameFeedback):
                             "Trial: " + str(self.trial_counter) +
                             " | " + str(rp) + 
                             " | " + str(rp_val_transformed) + 
-                            " | " + pedal_timestamp_str + 
+                            " | " + self.eeg_history[index_emg_onset]['pyff_timestamp'][-12:] + 
+                            " | " + pedal_timestamp_str +
                             " | " + self.eeg_history[index_emg_onset]['matlab_timestamp'] + 
-                            " | " + self.eeg_history[index_emg_onset]['pyff_timestamp']) 
+                            " | " + press_onset_diff)
 
                         self.write_to_file(content_to_write)
                         # Present the RP value on screen
@@ -248,6 +250,7 @@ class ReadinessFeedback(PygameFeedback):
             self.emg_history = []
     
     # Returns the index in the eeg/emg history array when it finds the emg onset. And -1 if it there is an error.
+    # Returns the timestamp of the pedal press, and also returns the time difference between pedal press and onset. 
     def check_emg_onset(self): 
         self.searching_rp = True #Prevents messing up with the index of the array by adding more things. 
         found = False
@@ -255,6 +258,7 @@ class ReadinessFeedback(PygameFeedback):
         i = total_size - 3 #index position from back.
         return_index = -1
         pedal_timestamp_str = ''
+        press_onset_diff = -1
         while(not found and not i <= 0) :
             if(self.emg_history[i+1]['data'] == 1 and self.emg_history[i]['data'] == 0):
                 found = True
@@ -266,10 +270,11 @@ class ReadinessFeedback(PygameFeedback):
                 onset_timestamp = float(self.eeg_history[return_index]['matlab_timestamp'][-6:]) * 1000
                 pedal_timestamp_str = self.eeg_history[total_size - 1]['matlab_timestamp']
                 pedal_timestamp = float(pedal_timestamp_str[-6:]) * 1000
-                if pedal_timestamp - onset_timestamp > 1000 or pedal_timestamp - onset_timestamp < 100:
+                press_onset_diff = pedal_timestamp - onset_timestamp
+                if press_onset_diff > 1000 or press_onset_diff < 100:
                     return_index = -1 
             i -= 1
-        return return_index, pedal_timestamp_str
+        return return_index, pedal_timestamp_str, press_onset_diff
 
     def present_stimulus(self):
         threading.Thread(target = self.draw_fixation_cross).start() #draw cross
