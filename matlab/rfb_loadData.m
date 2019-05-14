@@ -1,0 +1,24 @@
+
+function [mrk,cnt,mnt] = rfb_loadData(subj_code,phase_name)
+
+global BTB
+
+ds_list = dir(BTB.MatDir);
+ds_idx = strncmp(subj_code,{ds_list.name},5);
+ds_name = ds_list(ds_idx).name;
+
+session_name = 'ReadinessFeedback';
+
+filename_eeg = sprintf('%s/%s_%s_%s',ds_name,session_name,phase_name,subj_code);
+filename_mrk = sprintf('%s%s_mrk.mat',BTB.MatDir,filename_eeg);
+
+fprintf('Loading data set %s, %s...\n',ds_name,phase_name)
+
+if nargout>1 || not(exist(filename_mrk,'file'))
+    [cnt,mrk,mnt] = file_loadMatlab(filename_eeg);
+    mnt.scale_box = [];
+    mnt = mnt_scalpToGrid(mnt);
+end
+if exist(filename_mrk,'file')
+    load(filename_mrk)
+end

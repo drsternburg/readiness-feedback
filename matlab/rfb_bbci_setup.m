@@ -1,17 +1,15 @@
 
-function bbci = sup_bbci_setup_offline(cnt,mrk)
+function bbci = rfb_bbci_setup
 
 global opt
 
 bbci = struct;
 
-bbci.source.acquire_fcn = @bbci_acquire_offline;
-bbci.source.acquire_param = {cnt,mrk,'blocksize',10,'realtime', 1};
-bbci.log.clock = 1;
-bbci.source.min_blocklength = 0;
+bbci.source.acquire_fcn = @bbci_acquire_bv;
+bbci.source.min_blocklength = 10;
 
 bbci.signal(1).source = 1;
-bbci.signal(1).clab = {'not','EMG'};
+bbci.signal(1).clab = {'not','E*','Acc*'};
 
 f_cutoff = 20;
 [filt_emg_b,filt_emg_a] = butter(6,f_cutoff/opt.acq.fs*2,'high');
@@ -34,17 +32,17 @@ bbci.classifier(1).C = opt.acq.C_rp;
 bbci.classifier(2).feature = 2;
 bbci.classifier(2).C = opt.acq.C_emg;
 
-bbci.control(1).fcn = @sup_bbci_control_button;
+bbci.control(1).fcn = @rfb_bbci_control_button;
 %bbci.control(1).condition.marker = opt.mrk.def{1,strcmp(opt.mrk.def(2,:),'button press')};
 bbci.control(1).condition.marker = 1;
 bbci.control(1).param = {opt};
 
 bbci.control(2).classifier = 1;
-bbci.control(2).fcn = @sup_bbci_control_cout;
+bbci.control(2).fcn = @rfb_bbci_control_cout;
 bbci.control(2).param = {opt};
 
 bbci.control(3).classifier = 2;
-bbci.control(3).fcn = @sup_bbci_control_emg;
+bbci.control(3).fcn = @rfb_bbci_control_emg;
 bbci.control(3).param = {opt};
 
 bbci.feedback(1).control= 1;
