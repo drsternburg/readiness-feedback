@@ -1,5 +1,4 @@
 
-warning off
 global BTB opt
 
 opt = struct;
@@ -51,16 +50,19 @@ opt.emg.sd_fac = 5;
 opt.emg.ival_valid = [-1000 -100];
 
 %% parameters for classification
-fv_ivals = fliplr(-[0 50 100 200 300 450 650 900 1200]);
-fv_ivals = [fv_ivals(1:end-1)'+10 fv_ivals(2:end)'];
-opt.cfy.baseln_len = 50;
-opt.cfy.baseln_pos = 'end';
-opt.cfy.fv_ivals = fv_ivals;
+opt.cfy.ival_baseln = [-100 0];
+opt.cfy.ival_fv = [-1000 -900;
+                   -900  -800;
+                   -800  -700;
+                   -700  -600;
+                   -600  -500;
+                   -500  -400;
+                   -400  -300;
+                   -300  -200;
+                   -200  -100;
+                   -100    0];
 opt.cfy.fv_window = [opt.cfy.fv_ivals(1)-10 0];
-opt.cfy.clab = {'not','E*'};
-opt.cfy.idle_mode = 'trial start';
-opt.cfy.idle_offset = -opt.cfy.fv_window(1);
-opt.cfy.min_ts2emg = -opt.cfy.fv_window(1)*2+500;
+opt.cfy.clab = {'not','E*','Acc*'};
 
 % for the fake classifier of phase 1:
 opt.cfy.C.gamma = randn;
@@ -80,59 +82,40 @@ opt.fig.pred_edges = -2500:100:800;
 %% feedback parameters
 opt.feedback.name  = 'TrafficLight';
 
-opt.feedback.blocks = {'Training1','Phase1','Training2','Phase2','RT'};
+opt.feedback.blocks = {'Training1','Phase1','Training2','Phase2'};
 
-record_audio = [0 0 1 1 0];
-listen_to_keyboard = [0 0 0 0 0];
-make_interruptions = [0 0 1 1 1];
-make_prompts = [0 0 1 1 0];
+listen_to_keyboard = [0 0 0 0];
+show_feedback = [0 0 1 1];
 
 end_pause_counter_type = [1 % button presses
                           1 % button presses
                           4 % seconds
                           4 % seconds 
-                          4 % seconds
                           ];
 end_after_x_events = [10
                       100
                       1*60
                       60*60
-                      8*60
                       ];
                   
 pause_every_x_events = [10
                         20
                         1*60
                         15*60
-                        4*60
                         ];
-
-bci_delayed_idle = [0 0 0 1 0];
-
-trial_assignment = {1,...
-                    1,...
-                    tl_acq_drawTrialAssignments(100,[0 0 .5 .5]),...
-                    tl_acq_drawTrialAssignments(1500,[.25 .25 .25 .25]),...
-                    tl_acq_drawTrialAssignments(100,[0 0 0 1])};
 
 for ii = 1:length(opt.feedback.blocks)
     
-    opt.feedback.rec_params(ii).record_audio = record_audio(ii);
     opt.feedback.pyff_params(ii).listen_to_keyboard = int16(listen_to_keyboard(ii));
-    opt.feedback.pyff_params(ii).make_interruptions = int16(make_interruptions(ii));
-    opt.feedback.pyff_params(ii).make_prompts = int16(make_prompts(ii));
+    opt.feedback.pyff_params(ii).show_feedback = int16(show_feedback(ii));
     opt.feedback.pyff_params(ii).end_pause_counter_type = int16(end_pause_counter_type(ii));
     opt.feedback.pyff_params(ii).end_after_x_events = int16(end_after_x_events(ii));
     opt.feedback.pyff_params(ii).pause_every_x_events = int16(pause_every_x_events(ii));
-    opt.feedback.pyff_params(ii).bci_delayed_idle = int16(bci_delayed_idle(ii));
-    if not(isempty(trial_assignment{ii}))
-        opt.feedback.pyff_params(ii).trial_assignment = int16(trial_assignment{ii});
-    end
     
 end
 
 %%
-clear trial_assignment fv_ivals Wps Ws n record_audio save_opt listen_to_keyboard make_interruptions end_after_x_events end_pause_counter_type pause_every_x_events bci_delayed_idle ii make_prompts
+clear  Wps Ws n listen_to_keyboard show_feedback end_after_x_events end_pause_counter_type pause_every_x_events
 
 
 

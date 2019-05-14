@@ -1,5 +1,5 @@
 
-function bbci = sup_bbci_setup_offline(cnt,mrk)
+function bbci = rfb_bbci_setup_offline(cnt,mrk)
 
 global opt
 
