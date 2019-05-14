@@ -21,7 +21,7 @@ BTB.Acq.StartLetter = 'a';
 BTB.FigPos = [1 1];
 
 %% parameters for raw data
-opt.eeg.nr_eeg_chans = 62;  %!!!
+opt.eeg.nr_eeg_chans = 64;  %!!!
 opt.eeg.bv_workspace = 'C:\Vision\Workfiles\ReadinessFeedback';
 opt.eeg.orig_fs = 1000;
 Wps = [42 49]/opt.eeg.orig_fs*2;
