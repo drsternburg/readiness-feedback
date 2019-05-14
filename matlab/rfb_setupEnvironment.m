@@ -33,14 +33,10 @@ opt.eeg.fs = 100;
 opt.mrk.min_ts2emg = 1500;
 opt.mrk.def = {  2 'button press';...
                -10 'trial start';...
-               -30 'trial end';...
+               -11 'trial end';...
+               -20 'block start';...
+               -21 'block end'
                }';
-% opt.mrk.def = {  2 'button press';...
-%                -10 'trial start';...
-%                -11 'trial end';...
-%                -20 'block start';...
-%                -21 'block end'
-%                }';
 
 %% parameters for finding EMG onsets
 opt.emg.wlen_bsln = 1000; % ms
@@ -65,9 +61,13 @@ opt.cfy.fv_window = [opt.cfy.ival_fv(1)-10 0];
 opt.cfy.clab = {'not','E*','Acc*'};
 
 % for the fake classifier of phase 1:
-opt.cfy.C.gamma = randn;
-opt.cfy.C.b = randn;
-opt.cfy.C.w = randn(size(opt.cfy.ival_fv,1)*opt.eeg.nr_eeg_chans,1);
+opt.cfy.C_rp.gamma = randn;
+opt.cfy.C_rp.b = randn;
+opt.cfy.C_rp.w = randn(size(opt.cfy.ival_fv,1)*opt.eeg.nr_eeg_chans,1);
+
+opt.cfy.C_emg.gamma = randn;
+opt.cfy.C_emg.b = randn;
+opt.cfy.C_emg.w = randn(size(opt.cfy.ival_fv,1)*opt.eeg.nr_eeg_chans,1);
 
 %% parameters for finding optimal prediction threshold
 opt.pred.tp_ival = [-600 -100];
