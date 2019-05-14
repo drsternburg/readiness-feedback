@@ -1,4 +1,4 @@
 
-function packet = rfb_bbci_control_cout(cfy_out,event,opt)
+function packet = rfb_bbci_control_cout(cfy_out,timestamp, event,opt)
 
-packet = {'i:cl_output',cfy_out};
+packet = {'i:cl_output', 's:timestamp', timestamp};

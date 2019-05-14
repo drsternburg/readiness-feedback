@@ -93,18 +93,18 @@ end_after_x_bps = [10
                    ];
                   
 pause_every_x_bps = [10
-                        25
-                        10
-                        25
-                        ];
+                    25
+                    10
+                    25
+                    ];
 
 for ii = 1:length(opt.feedback.blocks)
     
     opt.feedback.pyff_params(ii).listen_to_keyboard = int16(listen_to_keyboard(ii));
     opt.feedback.pyff_params(ii).show_feedback = int16(show_feedback(ii));
     opt.feedback.pyff_params(ii).end_pause_counter_type = int16(end_pause_counter_type(ii));
-    opt.feedback.pyff_params(ii).end_after_x_events = int16(end_after_x_events(ii));
-    opt.feedback.pyff_params(ii).pause_every_x_events = int16(pause_every_x_events(ii));
+    opt.feedback.pyff_params(ii).end_after_x_bps = int16(end_after_x_events(ii));
+    opt.feedback.pyff_params(ii).pause_every_x_bps = int16(pause_every_x_events(ii));
     
 end
 
