@@ -1,7 +1,7 @@
-function packet = sup_bbci_control_emg(cfy_out,event,opt)
+function packet = sup_bbci_control_emg(cfy_out,timestamp,event,opt)
 
 if cfy_out >= 0
-    packet = {'i:emg',1};
+    packet = {'i:emg',1, 's:timestamp', timestamp};
 else
-    packet = {'i:emg',0};
+    packet = {'i:emg',0, 's:timestamp', timestamp};
 end
