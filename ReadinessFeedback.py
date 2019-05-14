@@ -35,7 +35,6 @@ class ReadinessFeedback(PygameFeedback):
         PygameFeedback.init(self)
 
         ########################################################################
-        self.FPS = 200
         self.screenPos = [0, 0]
         self.screenSize = [1000, 1000]
         self.screen_center = [self.screenSize[0] / 2, self.screenSize[1] / 2]
@@ -50,12 +49,10 @@ class ReadinessFeedback(PygameFeedback):
         self.red_color = [225, 0, 0]
         self.radius = 100
  
-        self.pause_text = 'Press pedal to start...'
+        self.pause_text = 'Paused. Press pedal to start...'
         self.paused = True
         self.on_trial = False
-        self.on_training = False #This is used to control the offline or online stage. 
         self.searching_rp = False
-        self.max_trials = 100
 
         ########################################################################
 
@@ -70,33 +67,33 @@ class ReadinessFeedback(PygameFeedback):
         # MAIN PARAMETERS TO BE SET IN MATLAB
 
         self.listen_to_keyboard = 1
-        self.pause_every_x_events = 2
-        self.end_after_x_events = 6
+        self.show_feedback = False
+        self.max_trials = 100
+        self.max_blocks = 100
+        self.log_directory = '/tmp'
+        self.session_name = 'session_tmp'
+        self.block_counter = 1
 
         ########################################################################
 
         # logic parameters
         self.emg_history = []
         self.eeg_history = []
-        # self.rp_history = []
         self.last_cross_shown = pygame.time.get_ticks()
         self.last_circle_shown = pygame.time.get_ticks()
         self.one_std_val = 25
         self.mean_value = 50
 
-        self.rp_dist_init = [3.40158,5.91582,8.72199,2.09857,1.57752,2.13866,1.31238,0.6742,-0.860305,0.869217,-2.20397,-0.427483,3.09122,-3.15091,6.29236,3.96954,-2.99037,-0.372976,3.0263,3.8923,-0.655221,1.86118,2.16084,-0.00743317,-10.7251,0.493279,0.844872,2.12802,4.46754,2.9867,2.67655,4.06675,1.01152,2.13234,3.17019,-0.483233,2.92781,3.2214,-3.94281,-1.15404,4.38632,1.29367,4.01247,-0.0690076,6.65976,6.36116,-0.479293,6.05266,5.24286,4.2689,-3.3575,4.44705,1.55116,2.94615,2.08329,4.34001,2.62014,5.26946,1.24628,2.23645,1.19922,-0.454266,5.87512,4.72588,6.4719,6.14339,6.07847,8.75295,7.29186,5.12702,11.5874,1.30933,1.30272,-1.92392,-2.79681,0.776014,7.42855,0.952247,-0.469118,5.27124,3.45942,1.59118,3.96028,3.67294,3.03981,1.52358,2.41185,2.48132,2.03066,6.84007,4.25418,3.03598,2.84473,3.6167,1.53169,6.81807,2.31844,1.12883]
-        self.rp_dist_init = sorted(self.rp_dist_init)
-        self.mu = np.average(self.rp_dist_init)
-        self.std = np.std(self.rp_dist_init)
+        # self.rp_dist_init = [3.40158,5.91582,8.72199,2.09857,1.57752,2.13866,1.31238,0.6742,-0.860305,0.869217,-2.20397,-0.427483,3.09122,-3.15091,6.29236,3.96954,-2.99037,-0.372976,3.0263,3.8923,-0.655221,1.86118,2.16084,-0.00743317,-10.7251,0.493279,0.844872,2.12802,4.46754,2.9867,2.67655,4.06675,1.01152,2.13234,3.17019,-0.483233,2.92781,3.2214,-3.94281,-1.15404,4.38632,1.29367,4.01247,-0.0690076,6.65976,6.36116,-0.479293,6.05266,5.24286,4.2689,-3.3575,4.44705,1.55116,2.94615,2.08329,4.34001,2.62014,5.26946,1.24628,2.23645,1.19922,-0.454266,5.87512,4.72588,6.4719,6.14339,6.07847,8.75295,7.29186,5.12702,11.5874,1.30933,1.30272,-1.92392,-2.79681,0.776014,7.42855,0.952247,-0.469118,5.27124,3.45942,1.59118,3.96028,3.67294,3.03981,1.52358,2.41185,2.48132,2.03066,6.84007,4.25418,3.03598,2.84473,3.6167,1.53169,6.81807,2.31844,1.12883]
+        # self.rp_dist_init = sorted(self.rp_dist_init)
+        # self.mu = np.average(self.rp_dist_init)
+        # self.std = np.std(self.rp_dist_init)
         
     def pre_mainloop(self):
         PygameFeedback.pre_mainloop(self)
         self.font_text = pygame.font.Font(None, self.text_fontsize)
         self.font_char = pygame.font.Font(None, self.char_fontsize)
         self.trial_counter = 0
-        self.block_counter = 0
-        self.move_counter = 0
-        self.idle_counter = 0
         self.reset_trial_states()
         self.on_pause()
         self.render_text(self.pause_text)
@@ -106,8 +103,6 @@ class ReadinessFeedback(PygameFeedback):
         self.time_trial_start = float('infinity')
         self.yellow_until = float('infinity')
         self.redgreen_until = float('infinity')
-        self.yellow_on = False
-        self.redgreen_on = False
         self.already_interrupted = False
         self.already_interrupted_silent = False
         self.this_prompt = False
@@ -124,11 +119,13 @@ class ReadinessFeedback(PygameFeedback):
         self.render_text(self.pause_text)
 
     def unpause(self):
-        self.log('Starting block ' + str(self.block_counter + 1))
-        now = pygame.time.get_ticks()
+        self.log('Starting trial ' + str(self.trial_counter + 1))
+        # Restart the history
+        self.eeg_history = []
+        self.emg_history = []
+
         self.paused = False
         self.on_trial = True
-        self.time_trial_end = now
         self.present_stimulus()
 
     def tick(self):
@@ -137,15 +134,29 @@ class ReadinessFeedback(PygameFeedback):
             self.on_keyboard_event()
 
     def on_control_event(self, data):
+
+        if u'block_name' in data:
+            self.session_name = data[u'block_name']
+
+        if u'data_dir' in data:
+            self.log_directory = data[u'data_dir']
+
+        if u'show_feedback' in data:
+            self.show_feedback = data[u'show_feedback']
         
-        # TODO: Get the name of the file to be logged.
-        if u'interaction-signal' in data: #This is on init only, we would then find the mean and the std of the training data. 
-            set_data = data[u'interaction-signal'][1]
+        if u'end_after_x_bps' in data:
+            self.max_trials = data[u'end_after_x_bps']
+
+        if u'pause_every_x_bps' in data:
+            self.max_blocks = data[u'pause_every_x_bps']
+
+        if u'phase1_cout' in data: #This is on init only, we would then find the mean and the std of the training data. 
+            set_data = data[u'phase1_cout']
             self.rp_dist_init = sorted(set_data[len(set_data)/2:])
             self.mu = np.average(self.rp_dist_init)
             self.std = np.std(self.rp_dist_init)
 
-        if self.on_trial and not self.paused and not self.on_training and not self.searching_rp:
+        if self.on_trial and not self.paused and not self.show_feedback and not self.searching_rp:
             now = datetime.datetime.utcnow().strftime('%H:%M:%S.%f')[:-3]
             if u'emg' in data:
                 self.emg_history.append({
@@ -168,7 +179,7 @@ class ReadinessFeedback(PygameFeedback):
         return int(round(self.one_std_val * z_score + self.mean_value))
 
     def write_to_file(self, content):
-        f = open("rp-test.txt", "a")
+        f = open(self.log_directory + '/' + self.session_name, "a")
         f.write(content)
         f.write("\n")
         f.close()
@@ -203,7 +214,7 @@ class ReadinessFeedback(PygameFeedback):
                 
                 self.trial_counter +=1
 
-                if not self.on_training:
+                if not self.show_feedback:
                     # Calculating the RP based on EEG and EMG history
                     index_emg_onset, pedal_timestamp_str, press_onset_diff= self.check_emg_onset()
                     if index_emg_onset == -1: # meaning there is an error in the EMG onset
@@ -218,6 +229,7 @@ class ReadinessFeedback(PygameFeedback):
 
                         # write to file, the necessary info about the rp
                         content_to_write = self.log(
+                            "Block: " + str(self.block_counter) +  
                             "Trial: " + str(self.trial_counter) +
                             " | " + str(rp) + 
                             " | " + str(rp_val_transformed) + 
@@ -230,20 +242,30 @@ class ReadinessFeedback(PygameFeedback):
                         # Present the RP value on screen
                         self.draw_text(str(rp_val_transformed)) 
                         pygame.time.delay(2000) #delay for 2 seconds then present the cross         
+                
+                
 
                 if self.trial_counter == self.max_trials :
-                    if self.on_training: #on the training session
+                    if self.show_feedback: #on the training session
                         self.draw_text("Finished training...")
                         
                     else: #On the online session
                         self.draw_text("Finished session...")
 
-                    pygame.time.delay(5000) #delay for 1 second      
-                    self.on_training = False
+                    pygame.time.delay(5000) #delay for 5 seconds
+                    self.show_feedback = False
                     self.trial_counter = 0
+                    self.block_counter = 0
                     self.on_pause()
                     return
 
+                # Give the user a pause/break when it has reached the maximum block during that session.
+                # Or to give the user time to think the next strategy 
+                if self.trial_counter > 0 and self.trial_counter % self.max_blocks == 0:
+                    self.block_counter += 1
+                    self.on_pause()
+                    return
+                    
             self.present_stimulus()
             # Restart the history
             self.eeg_history = []
