@@ -8,15 +8,14 @@ opt.session_name = 'ReadinessFeedback';
 if ispc
     BTB.PrivateDir = 'C:\bbci';
 end
-addpath(fullfile(BTB.PrivateDir,'readiness-feedback'))
-addpath(fullfile(BTB.PrivateDir,'readiness-feedback','acquisition'))
+addpath(fullfile(BTB.PrivateDir,'readiness-feedback','matlab'))
 
 %%
 BTB.Acq.Geometry = [1281 1 1280 998];
 BTB.Acq.Dir = fullfile(BTB.PrivateDir,'readiness-feedback','acquisition');
 BTB.Acq.IoAddr = hex2dec('0378');
 BTB.PyffDir = 'C:\bbci\pyff\src';
-BTB.Acq.Prefix = 'r';
+BTB.Acq.Prefix = 'f';
 BTB.Acq.StartLetter = 'a';
 BTB.FigPos = [1 1];
 
@@ -100,16 +99,14 @@ pause_every_x_bps = [10
 
 for ii = 1:length(opt.feedback.blocks)
     
-    opt.feedback.pyff_params(ii).listen_to_keyboard = int16(listen_to_keyboard(ii));
     opt.feedback.pyff_params(ii).show_feedback = int16(show_feedback(ii));
-    opt.feedback.pyff_params(ii).end_pause_counter_type = int16(end_pause_counter_type(ii));
-    opt.feedback.pyff_params(ii).end_after_x_events = int16(end_after_x_events(ii));
-    opt.feedback.pyff_params(ii).pause_every_x_events = int16(pause_every_x_events(ii));
+    opt.feedback.pyff_params(ii).end_after_x_bps = int16(end_after_x_bps(ii));
+    opt.feedback.pyff_params(ii).pause_every_x_bps = int16(pause_every_x_bps(ii));
     
 end
 
 %%
-clear  Wps Ws n listen_to_keyboard show_feedback end_after_x_events end_pause_counter_type pause_every_x_events
+clear  ii Wps Ws n show_feedback end_after_x_bps pause_every_x_bps
 
 
 
