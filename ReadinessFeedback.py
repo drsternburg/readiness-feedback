@@ -50,6 +50,7 @@ class ReadinessFeedback(PygameFeedback):
         self.radius = 100
  
         self.pause_text = 'Paused. Press pedal to start...'
+        self.end_text = 'Finished. Session has ended...'
         self.paused = True
         self.on_trial = False
         self.searching_rp = False
@@ -73,10 +74,10 @@ class ReadinessFeedback(PygameFeedback):
         ########################################################################
         # MAIN PARAMETERS TO BE SET IN MATLAB
 
-        self.listen_to_keyboard = 0
+        self.listen_to_keyboard = 1
         self.show_feedback = False
-        self.max_trials = 100
-        self.max_blocks = 10
+        self.max_trials = 3
+        self.max_blocks = 1
         self.log_directory = '/tmp'
         self.session_name = 'session_tmp'
         self.block_counter = 1
@@ -118,6 +119,16 @@ class ReadinessFeedback(PygameFeedback):
         self.paused = True
         self.on_trial = False
         self.draw_text(self.pause_text)
+    
+    def end_session(self):
+        self.log('Phase ends')
+        self.show_feedback = False
+        self.trial_counter = 0
+        self.block_counter = 0
+        self.reset_trial_states()       
+        self.paused = True
+        self.on_trial = False
+        self.draw_text(self.end_text)
 
     def unpause(self):
         # self.log('Starting block ' + str(self.block_counter))
@@ -187,13 +198,16 @@ class ReadinessFeedback(PygameFeedback):
     def on_keyboard_event(self):
         self.process_pygame_events()
         if self.keypressed:
+            self.keypressed = False
             if self.on_trial and not self.this_prompt:
                 self.pedal_press()
+                return
             if self.paused and not self.on_trial:
                 self.unpause()
+                return
             if not self.on_trial:
                 self.already_interrupted = False
-            self.keypressed = False
+                return
         
     def pedal_press(self):
         now = pygame.time.get_ticks()
@@ -247,20 +261,7 @@ class ReadinessFeedback(PygameFeedback):
                 if self.trial_counter == self.max_trials :
                     self.send_parallel_log(self.marker_trial_end) #Trial ends here
                     self.send_parallel_log(self.marker_block_end) #Block ends here
-                    if self.show_feedback: #on the training session
-                        self.log("finished training")
-                        self.draw_text("Finished training...")
-                        
-                    else: #On the online session
-                        self.log("finished session")
-                        self.draw_text("Finished session...")
-
-                    pygame.time.delay(5000) #delay for 5 seconds
-                    self.show_feedback = False
-                    self.trial_counter = 0
-                    self.block_counter = 0
-                    self.reset_trial_states()
-                    self.on_pause()
+                    self.end_session()
                     return
 
                 # Give the user a pause/break when it has reached the maximum block during that session.
