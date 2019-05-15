@@ -56,6 +56,14 @@ class ReadinessFeedback(PygameFeedback):
 
         ########################################################################
 
+        self.marker_identifier = {
+            -10:"Trial starts",
+            -11:"Trial ends",
+            -20:"block starts",
+            -21:"block ends",
+            -30:"showing rp"
+        }
+
         self.marker_trial_start = -10
         self.marker_trial_end = -11
         self.marker_block_start = -20
@@ -67,8 +75,8 @@ class ReadinessFeedback(PygameFeedback):
 
         self.listen_to_keyboard = 1
         self.show_feedback = False
-        self.max_trials = 100
-        self.max_blocks = 100
+        self.max_trials = 10
+        self.max_blocks = 5
         self.log_directory = '/tmp'
         self.session_name = 'session_tmp'
         self.block_counter = 1
@@ -118,7 +126,7 @@ class ReadinessFeedback(PygameFeedback):
         self.render_text(self.pause_text)
 
     def unpause(self):
-        self.log('Starting block ' + str(self.block_counter))
+        # self.log('Starting block ' + str(self.block_counter))
         self.send_parallel_log(self.marker_block_start) #Block starts here
         # Restart the history
         self.eeg_history = []
