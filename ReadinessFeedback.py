@@ -56,12 +56,11 @@ class ReadinessFeedback(PygameFeedback):
 
         ########################################################################
 
-        self.marker_keyboard_press = 199
-        self.marker_quit = 255
-        self.marker_base_start = 10
-        self.marker_base_interruption = 20
-        self.marker_trial_end = 30
-        self.marker_prompt = 40
+        self.marker_trial_start = -10
+        self.marker_trial_end = -11
+        self.marker_block_start = -20
+        self.marker_block_end = -21
+        self.marker_rp_shown = -30
 
         ########################################################################
         # MAIN PARAMETERS TO BE SET IN MATLAB
@@ -119,7 +118,8 @@ class ReadinessFeedback(PygameFeedback):
         self.render_text(self.pause_text)
 
     def unpause(self):
-        self.log('Starting trial ' + str(self.trial_counter + 1))
+        self.log('Starting block ' + str(self.block_counter))
+        self.send_parallel_log(self.marker_block_start) #Block starts here
         # Restart the history
         self.eeg_history = []
         self.emg_history = []
@@ -240,11 +240,10 @@ class ReadinessFeedback(PygameFeedback):
 
                         self.write_to_file(content_to_write)
                         # Present the RP value on screen
+                        self.send_parallel_log(self.marker_rp_shown) #Sends the marker that the rp is being shown now.
                         self.draw_text(str(rp_val_transformed)) 
                         pygame.time.delay(2000) #delay for 2 seconds then present the cross         
                 
-                
-
                 if self.trial_counter == self.max_trials :
                     if self.show_feedback: #on the training session
                         self.draw_text("Finished training...")
@@ -262,10 +261,13 @@ class ReadinessFeedback(PygameFeedback):
                 # Give the user a pause/break when it has reached the maximum block during that session.
                 # Or to give the user time to think the next strategy 
                 if self.trial_counter > 0 and self.trial_counter % self.max_blocks == 0:
+                    self.send_parallel_log(self.marker_block_end) #Block ends here
                     self.block_counter += 1
                     self.on_pause()
                     return
-                    
+            
+            # sends a parallel log to show that the trial ends. 
+            self.send_parallel_log(self.marker_trial_end) #Trial ends here
             self.present_stimulus()
             # Restart the history
             self.eeg_history = []
@@ -302,6 +304,8 @@ class ReadinessFeedback(PygameFeedback):
         threading.Thread(target = self.draw_fixation_cross).start() #draw cross
         pygame.time.delay(2500) #delay for 2.5 seconds then white circle         
         threading.Thread(target = self.draw_circle, args=[self.white_color]).start() #draw white circle
+        # sends a parallel log to show that the trial starts. 
+        self.send_parallel_log(self.marker_trial_start)
 
     def draw_circle(self, color):
         self.screen.fill(self.background_color)
