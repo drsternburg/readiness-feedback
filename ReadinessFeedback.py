@@ -73,10 +73,10 @@ class ReadinessFeedback(PygameFeedback):
         ########################################################################
         # MAIN PARAMETERS TO BE SET IN MATLAB
 
-        self.listen_to_keyboard = 1
+        self.listen_to_keyboard = 0
         self.show_feedback = False
-        self.max_trials = 10
-        self.max_blocks = 5
+        self.max_trials = 100
+        self.max_blocks = 10
         self.log_directory = '/tmp'
         self.session_name = 'session_tmp'
         self.block_counter = 1
@@ -106,24 +106,18 @@ class ReadinessFeedback(PygameFeedback):
         self.render_text(self.pause_text)
 
     def reset_trial_states(self):
-        self.time_trial_end = float('infinity')
-        self.time_trial_start = float('infinity')
-        self.yellow_until = float('infinity')
-        self.redgreen_until = float('infinity')
         self.already_interrupted = False
         self.already_interrupted_silent = False
         self.this_prompt = False
-        self.this_premature = False
 
     def post_mainloop(self):
         PygameFeedback.post_mainloop(self)
 
     def on_pause(self):
         self.log('Paused. Waiting for participant to continue...')
-        self.time_trial_start = float('infinity')
         self.paused = True
         self.on_trial = False
-        self.render_text(self.pause_text)
+        self.draw_text(self.pause_text)
 
     def unpause(self):
         # self.log('Starting block ' + str(self.block_counter))
@@ -131,7 +125,6 @@ class ReadinessFeedback(PygameFeedback):
         # Restart the history
         self.eeg_history = []
         self.emg_history = []
-
         self.paused = False
         self.on_trial = True
         self.present_stimulus()
@@ -142,7 +135,6 @@ class ReadinessFeedback(PygameFeedback):
             self.on_keyboard_event()
 
     def on_control_event(self, data):
-
         if u'block_name' in data:
             self.session_name = data[u'block_name']
 
@@ -197,7 +189,7 @@ class ReadinessFeedback(PygameFeedback):
         if self.keypressed:
             if self.on_trial and not self.this_prompt:
                 self.pedal_press()
-            if self.paused:
+            if self.paused and not self.on_trial:
                 self.unpause()
             if not self.on_trial:
                 self.already_interrupted = False
@@ -209,10 +201,10 @@ class ReadinessFeedback(PygameFeedback):
 
         if self.paused:
             self.unpause()
-            # then the training/online reall starts. 
         else:
             # restart the trial if they press it for less than 2 seconds
             if(now - self.last_circle_shown < 2000):
+                self.log("Participant needs to wait 2 seconds.")
                 self.draw_text("Too quick, retry again")
                 pygame.time.delay(1000) #delay for 1 second      
                 
@@ -222,12 +214,12 @@ class ReadinessFeedback(PygameFeedback):
                 
                 self.trial_counter +=1
 
-                if not self.show_feedback:
+                if self.show_feedback:
                     # Calculating the RP based on EEG and EMG history
                     index_emg_onset, pedal_timestamp_str, press_onset_diff= self.check_emg_onset()
                     if index_emg_onset == -1: # meaning there is an error in the EMG onset
                         self.trial_counter -=1 #doesn't count as a trial
-
+                        self.log("Movement too quick/slow, trial doesn't count")
                         self.draw_text("Movemnt too quick/slow")
                         pygame.time.delay(1000) #delay for 1 second  
                     else:
@@ -253,24 +245,31 @@ class ReadinessFeedback(PygameFeedback):
                         pygame.time.delay(2000) #delay for 2 seconds then present the cross         
                 
                 if self.trial_counter == self.max_trials :
+                    self.send_parallel_log(self.marker_trial_end) #Trial ends here
+                    self.send_parallel_log(self.marker_block_end) #Block ends here
                     if self.show_feedback: #on the training session
+                        self.log("finished training")
                         self.draw_text("Finished training...")
                         
                     else: #On the online session
+                        self.log("finished session")
                         self.draw_text("Finished session...")
 
                     pygame.time.delay(5000) #delay for 5 seconds
                     self.show_feedback = False
                     self.trial_counter = 0
                     self.block_counter = 0
+                    self.reset_trial_states()
                     self.on_pause()
                     return
 
                 # Give the user a pause/break when it has reached the maximum block during that session.
                 # Or to give the user time to think the next strategy 
                 if self.trial_counter > 0 and self.trial_counter % self.max_blocks == 0:
+                    self.send_parallel_log(self.marker_trial_end) #Trial ends here
                     self.send_parallel_log(self.marker_block_end) #Block ends here
                     self.block_counter += 1
+                    self.reset_trial_states()
                     self.on_pause()
                     return
             
