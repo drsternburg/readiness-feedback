@@ -31,6 +31,7 @@ opt.eeg.fs = 100;
 %% markers
 opt.mrk.min_ts2emg = 1500;
 opt.mrk.def = {  2 'button press';...
+               -30 'rp shown'; ...
                -10 'trial start';...
                -11 'trial end';...
                -20 'block start';...
@@ -92,16 +93,17 @@ end_after_x_bps = [10
                    ];
                   
 pause_every_x_bps = [10
-                        25
-                        10
-                        25
-                        ];
+                    25
+                    10
+                    25
+                    ];
 
 for ii = 1:length(opt.feedback.blocks)
     
     opt.feedback.pyff_params(ii).show_feedback = int16(show_feedback(ii));
     opt.feedback.pyff_params(ii).end_after_x_bps = int16(end_after_x_bps(ii));
     opt.feedback.pyff_params(ii).pause_every_x_bps = int16(pause_every_x_bps(ii));
+
     
 end
 
