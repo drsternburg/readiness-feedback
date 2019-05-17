@@ -17,7 +17,7 @@ end
 mrk = rfb_loadData(subj_code,phase_name);
 
 % remove trailing BPs (double or multiple successive BPs, happens sometimes)
-ci_bp = find(strcmp(mrk.className,'button press'));
+ci_bp = find(strcmp(mrk.className,'pedal press'));
 remove = [];
 for ii = 1:length(mrk.time)-1
     if find(mrk.y(:,ii))==ci_bp && find(mrk.y(:,ii+1))==ci_bp

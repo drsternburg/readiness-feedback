@@ -12,7 +12,7 @@ else
 end
 
 % read raw data
-[cnt,mrk] = file_readBV(file,'fs',opt.eeg.fs,'filt',opt.eeg.filt,'clab',noninfclab);
+[cnt,mrk] = file_readBV(file,'fs',opt.acq.fs,'filt',opt.acq.filt,'clab',noninfclab);
 
 % define markers
 mrk = mrk_defineClasses(mrk,opt.mrk.def);

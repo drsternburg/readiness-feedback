@@ -1,14 +1,8 @@
 
-rfb_setupEnvironment;
 global opt
-warning off
 
 %% setup participant
 acq_makeDataFolder;
-
-%% Start BrainVision Recorder and load workspace
-system('C:\Vision\Recorder\Recorder.exe &'); pause(6);
-bvr_sendcommand('loadworkspace',opt.acq.bv_workspace);
 
 %% Test the triggers
 bbci_trigger_parport(10,BTB.Acq.IoLib,BTB.Acq.IoAddr);
@@ -30,10 +24,10 @@ rfb_initialCleanup(BTB.Tp.Code,'Phase1');
 rfb_registerOnsets_Acc(BTB.Tp.Code);
 
 %% Inspect data
-cout = rfb_quickInspection;
+cout = rfb_quickInspection(BTB.Tp.Code);
 
 %% Train classifiers
-[mrk,cnt] = rfb_loadData(BTB.Tp.Code);
+[mrk,cnt] = rfb_loadData(BTB.Tp.Code,'Phase1');
 
 cnt1 = proc_selectChannels(cnt,opt.cfy_rp.clab);
 mrk1 = mrk_selectClasses(mrk,{'trial start','movement onset'});
@@ -57,10 +51,10 @@ bbci = rfb_bbci_setup;
 opt.feedback.pyff_params(3).phase1_cout = cout;
 
 %% Training for Phase 2
-tl_acq_startRecording('Practice_Phase2',bbci)
+rfb_startRecording('Practice_Phase2',bbci)
 
 %% Phase 2
-tl_acq_startRecording('Phase2',bbci)
+rfb_startRecording('Phase2',bbci)
 
 %% Save options struct
 optfile = [fullfile(BTB.Tp.Dir,opt.session_name) '_' BTB.Tp.Code '_opt'];

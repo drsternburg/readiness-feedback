@@ -3,11 +3,13 @@ function rfb_registerOnsets_Acc(subj_code)
 
 global opt BTB
 
-[mrk,cnt] = rfb_loadData(subj_code,'Phase1');
+[mrk_orig,cnt] = rfb_loadData(subj_code,'Phase1');
 
 cnt = proc_selectChannels(cnt,'Acc*');
 dt = 1000/cnt.fs;
 
+trial_mrk = rfb_getTrialMarkers(mrk_orig);
+mrk = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
 mrk = mrk_selectClasses(mrk,{'trial start','pedal press'});
 Nt = sum(mrk.y(1,:));
 i_trial = reshape(1:Nt*2,2,Nt);
@@ -17,6 +19,7 @@ for jj = 1:Nt
     
     i_trial_ = i_trial(:,setdiff(1:Nt,jj));
     mrk_train = mrk_selectEvents(mrk,i_trial_(:));
+    mrk_train.time(logical(mrk_train.y(1,:))) = mrk_train.time(logical(mrk_train.y(1,:)))+opt.acc.offset; 
     fv = proc_segmentation(cnt,mrk_train,opt.acc.ival);
     fv = proc_variance(fv);
     fv = proc_logarithm(fv);
@@ -27,7 +30,7 @@ for jj = 1:Nt
     T = [mrk_trial.time(1)+opt.acc.offset mrk_trial.time(2)];
     t = T(1);
     while t <=T(2)
-        fv = proc_segmentation(cnt,t,ival);
+        fv = proc_segmentation(cnt,t,opt.acc.ival);
         fv = proc_variance(fv);
         fv = proc_logarithm(fv);
         fv = proc_flaten(fv);
@@ -47,14 +50,18 @@ t_onset(isnan(t_onset)) = [];
 mrk2.time = t_onset;
 mrk2.y = ones(1,length(t_onset));
 mrk2.className = {'movement onset'};
-mrk = mrk_mergeMarkers(mrk,mrk2);
+mrk = mrk_mergeMarkers(mrk_orig,mrk2);
 mrk = mrk_sortChronologically(mrk);
 
 %% plot
 epo = proc_segmentation(cnt,mrk_selectClasses(mrk,'movement onset'),[-1000 1000]);
 figure
 clrs = lines;
-plot(epo.t,abs(squeeze(epo.x)),'color',clrs(1,:))
+for jj = 1:3
+    subplot(3,1,jj)
+    plot(epo.t,squeeze(squeeze(epo.x(:,jj,:))),'color',clrs(jj,:))
+    title(epo.clab{jj})
+end
 
 %% save new marker struct
 ds_list = dir(BTB.MatDir);

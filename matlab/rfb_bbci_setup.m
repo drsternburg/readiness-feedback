@@ -52,9 +52,9 @@ bbci.feedback(2).receiver= 'pyff';
 bbci.feedback(3).control= 3;
 bbci.feedback(3).receiver= 'pyff';
 
-bbci.quit_condition.marker = 255;
+bbci.quit_condition.marker = -255;
 
-% bbci.log.output = 'screen';
-% bbci.log.filebase = '~/bbci/log/log';
+bbci.log.output = 'screen&file';
+%bbci.log.filebase = '~/bbci/log/log';
 bbci.log.classifier = 1;
 
