@@ -1,5 +1,5 @@
 
-function rfb_registerEMGOnsets(subj_code)
+function rfb_registerOnsets(subj_code)
 
 global opt
 
