@@ -9,7 +9,7 @@ global opt
 [mrk,cnt,mnt] = rfb_loadData(subj_code,'Phase1');
 trial_mrk = rfb_getTrialMarkers(mrk);
 mrk = mrk_selectEvents(mrk,[trial_mrk{:}]);
-mrk = mrk_selectClasses(mrk,{'trial start','EMG onset'});
+mrk = mrk_selectClasses(mrk,{'trial start','movement onset'});
 
 %% cross-validation
 cnt = proc_selectChannels(cnt,opt.cfy.clab);
@@ -21,6 +21,7 @@ opt.cfy.C = train_RLDAshrink(fv.x,fv.y);
 
 fv = proc_flaten(fv);
 [loss,~,cout] = crossvalidation(fv,@train_RLDAshrink,'SampleFcn',@sample_leaveOneOut);
+cout = cout(logical(fv.y(2,:)));
 acc = 100*(1-loss);
 fprintf('\nClassification accuracy: %2.1f\n',acc)
 

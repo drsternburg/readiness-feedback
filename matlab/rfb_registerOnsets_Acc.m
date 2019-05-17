@@ -1,10 +1,9 @@
 
-function rfb_registerOnsets_Acc(cnt,mrk)
+function rfb_registerOnsets_Acc(subj_code)
 
-%global opt BTB
+global opt BTB
 
-ival = [-50 0];
-offset = 500;
+[mrk,cnt] = rfb_loadData(subj_code,'Phase1');
 
 cnt = proc_selectChannels(cnt,'Acc*');
 dt = 1000/cnt.fs;
@@ -18,14 +17,14 @@ for jj = 1:Nt
     
     i_trial_ = i_trial(:,setdiff(1:Nt,jj));
     mrk_train = mrk_selectEvents(mrk,i_trial_(:));
-    fv = proc_segmentation(cnt,mrk_train,ival);
+    fv = proc_segmentation(cnt,mrk_train,opt.acc.ival);
     fv = proc_variance(fv);
     fv = proc_logarithm(fv);
     fv = proc_flaten(fv);
     C = train_RLDAshrink(fv.x,fv.y);
     
     mrk_trial = mrk_selectEvents(mrk,i_trial(:,jj));
-    T = [mrk_trial.time(1)+offset mrk_trial.time(2)];
+    T = [mrk_trial.time(1)+opt.acc.offset mrk_trial.time(2)];
     t = T(1);
     while t <=T(2)
         fv = proc_segmentation(cnt,t,ival);
@@ -41,7 +40,7 @@ for jj = 1:Nt
     end
     
 end
-fprintf('%d EMG onsets assigned to %d trials.\n',sum(not(isnan(t_onset))),Nt)
+fprintf('%d Movement onsets assigned to %d trials.\n',sum(not(isnan(t_onset))),Nt)
 
 %% insert new markers
 t_onset(isnan(t_onset)) = [];
@@ -58,11 +57,11 @@ clrs = lines;
 plot(epo.t,abs(squeeze(epo.x)),'color',clrs(1,:))
 
 %% save new marker struct
-% ds_list = dir(BTB.MatDir);
-% ds_idx = strncmp(subj_code,{ds_list.name},5);
-% ds_name = ds_list(ds_idx).name;
-% filename = sprintf('%s%s/%s_%s_%s_mrk',BTB.MatDir,ds_name,opt.session_name,'Phase1',subj_code);
-% save(filename,'mrk')
+ds_list = dir(BTB.MatDir);
+ds_idx = strncmp(subj_code,{ds_list.name},5);
+ds_name = ds_list(ds_idx).name;
+filename = sprintf('%s%s/%s_%s_%s_mrk',BTB.MatDir,ds_name,opt.session_name,'Phase1',subj_code);
+save(filename,'mrk')
 
 
 

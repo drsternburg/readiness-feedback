@@ -20,22 +20,23 @@ BTB.Acq.StartLetter = 'a';
 BTB.FigPos = [1 1];
 
 %% parameters for raw data
-opt.eeg.nr_eeg_chans = 62;  %!!!
-opt.eeg.bv_workspace = 'C:\Vision\Workfiles\ReadinessFeedback';
-opt.eeg.orig_fs = 1000;
-Wps = [42 49]/opt.eeg.orig_fs*2;
+opt.acq.nr_eeg_chans = 62;  %!!!
+opt.acq.nr_acc_chans = 3;  %!!!
+opt.acq.bv_workspace = 'C:\Vision\Workfiles\ReadinessFeedback';
+opt.acq.orig_fs = 1000;
+Wps = [42 49]/opt.acq.orig_fs*2;
 [n,Ws] = cheb2ord(Wps(1),Wps(2),3,40);
-[opt.eeg.filt.b,opt.eeg.filt.a] = cheby2(n,50,Ws);
-opt.eeg.fs = 100;
+[opt.acq.filt.b,opt.acq.filt.a] = cheby2(n,50,Ws);
+opt.acq.fs = 100;
 
 %% markers
 opt.mrk.min_ts2emg = 1500;
-opt.mrk.def = {  2 'button press';...
-               -30 'rp shown'; ...
-               -10 'trial start';...
-               -11 'trial end';...
-               -20 'block start';...
-               -21 'block end'
+opt.mrk.def = { -2 'pedal press';...
+               30 'feedback'; ...
+               10 'trial start';...
+               11 'trial end';...
+               20 'block start';...
+               21 'block end'
                }';
 
 %% parameters for finding EMG onsets
@@ -45,9 +46,13 @@ opt.emg.wlen_minWT = 1300; % ms
 opt.emg.sd_fac = 5;
 opt.emg.ival_valid = [-1000 -100];
 
+%% parameters for finding movement onsets (accelerator)
+opt.acc.ival = [-50 0];
+opt.acc.offset = 500;
+
 %% parameters for classification
-opt.cfy.ival_baseln = [-100 0];
-opt.cfy.ival_fv = [-1000 -900;
+opt.cfy_rp.ival_baseln = [-100 0];
+opt.cfy_rp.ival_fv = [-1000 -900;
                    -900  -800;
                    -800  -700;
                    -700  -600;
@@ -57,24 +62,20 @@ opt.cfy.ival_fv = [-1000 -900;
                    -300  -200;
                    -200  -100;
                    -100    0];
-opt.cfy.fv_window = [opt.cfy.ival_fv(1)-10 0];
-opt.cfy.clab = {'not','E*','Acc*'};
+opt.cfy_rp.fv_window = [opt.cfy_rp.ival_fv(1)-10 0];
+opt.cfy_rp.clab = {'not','E*','Acc*'};
+
+opt.cfy_acc.clab = {'Acc*'};
+opt.cfy_acc.ival_fv = opt.acc.ival;
 
 % for the fake classifier of phase 1:
-opt.cfy.C_rp.gamma = randn;
-opt.cfy.C_rp.b = randn;
-opt.cfy.C_rp.w = randn(size(opt.cfy.ival_fv,1)*opt.eeg.nr_eeg_chans,1);
+opt.cfy_rp.C.gamma = randn;
+opt.cfy_rp.C.b = randn;
+opt.cfy_rp.C.w = randn(size(opt.cfy_rp.ival_fv,1)*opt.acq.nr_eeg_chans,1);
 
-opt.cfy.C_emg.gamma = randn;
-opt.cfy.C_emg.b = randn;
-opt.cfy.C_emg.w = randn(size(opt.cfy.ival_fv,1)*opt.eeg.nr_eeg_chans,1);
-
-%% parameters for finding optimal prediction threshold
-opt.pred.tp_ival = [-600 -100];
-opt.pred.fscore_beta = .5;
-opt.pred.thresh_move = 10; % for the fake classifier of phase 1
-opt.pred.thresh_idle = -10; % for the fake classifier of phase 1
-opt.pred.wt_prctl = [10 75];
+opt.cfy_acc.C.gamma = randn;
+opt.cfy_acc.C.b = randn;
+opt.cfy_acc.C.w = randn(opt.acq.nr_acc_chans,1);
 
 %% figure parameters
 opt.fig.pred_edges = -2500:100:800;
