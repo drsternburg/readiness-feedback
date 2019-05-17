@@ -9,7 +9,7 @@ bbci.source.acquire_fcn = @bbci_acquire_bv;
 bbci.source.min_blocklength = 10;
 
 bbci.signal(1).source = 1;
-bbci.signal(1).clab = {'not','EMG','Acc*'};
+bbci.signal(1).clab = {'not','E*','Acc*'};
 
 f_cutoff = 20;
 [filt_emg_b,filt_emg_a] = butter(6,f_cutoff/opt.acq.fs*2,'high');

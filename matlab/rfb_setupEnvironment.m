@@ -8,20 +8,19 @@ opt.session_name = 'ReadinessFeedback';
 if ispc
     BTB.PrivateDir = 'C:\bbci';
 end
-addpath(fullfile(BTB.PrivateDir,'readiness-feedback'))
-addpath(fullfile(BTB.PrivateDir,'readiness-feedback','acquisition'))
+addpath(fullfile(BTB.PrivateDir,'readiness-feedback','matlab'))
 
 %%
 BTB.Acq.Geometry = [1281 1 1280 998];
 BTB.Acq.Dir = fullfile(BTB.PrivateDir,'readiness-feedback','acquisition');
 BTB.Acq.IoAddr = hex2dec('0378');
 BTB.PyffDir = 'C:\bbci\pyff\src';
-BTB.Acq.Prefix = 'r';
+BTB.Acq.Prefix = 'f';
 BTB.Acq.StartLetter = 'a';
 BTB.FigPos = [1 1];
 
 %% parameters for raw data
-opt.eeg.nr_eeg_chans = 30;  %!!!
+opt.eeg.nr_eeg_chans = 62;  %!!!
 opt.eeg.bv_workspace = 'C:\Vision\Workfiles\ReadinessFeedback';
 opt.eeg.orig_fs = 1000;
 Wps = [42 49]/opt.eeg.orig_fs*2;
@@ -32,15 +31,12 @@ opt.eeg.fs = 100;
 %% markers
 opt.mrk.min_ts2emg = 1500;
 opt.mrk.def = {  2 'button press';...
+               -30 'rp shown'; ...
                -10 'trial start';...
-               -30 'trial end';...
+               -11 'trial end';...
+               -20 'block start';...
+               -21 'block end'
                }';
-% opt.mrk.def = {  2 'button press';...
-%                -10 'trial start';...
-%                -11 'trial end';...
-%                -20 'block start';...
-%                -21 'block end'
-%                }';
 
 %% parameters for finding EMG onsets
 opt.emg.wlen_bsln = 1000; % ms
@@ -61,13 +57,17 @@ opt.cfy.ival_fv = [-1000 -900;
                    -300  -200;
                    -200  -100;
                    -100    0];
-opt.cfy.fv_window = [opt.cfy.fv_ivals(1)-10 0];
+opt.cfy.fv_window = [opt.cfy.ival_fv(1)-10 0];
 opt.cfy.clab = {'not','E*','Acc*'};
 
 % for the fake classifier of phase 1:
-opt.cfy.C.gamma = randn;
-opt.cfy.C.b = randn;
-opt.cfy.C.w = randn(size(opt.cfy.fv_ivals,1)*opt.eeg.nr_eeg_chans,1);
+opt.cfy.C_rp.gamma = randn;
+opt.cfy.C_rp.b = randn;
+opt.cfy.C_rp.w = randn(size(opt.cfy.ival_fv,1)*opt.eeg.nr_eeg_chans,1);
+
+opt.cfy.C_emg.gamma = randn;
+opt.cfy.C_emg.b = randn;
+opt.cfy.C_emg.w = randn(size(opt.cfy.ival_fv,1)*opt.eeg.nr_eeg_chans,1);
 
 %% parameters for finding optimal prediction threshold
 opt.pred.tp_ival = [-600 -100];
@@ -80,42 +80,35 @@ opt.pred.wt_prctl = [10 75];
 opt.fig.pred_edges = -2500:100:800;
 
 %% feedback parameters
-opt.feedback.name  = 'TrafficLight';
+opt.feedback.name  = 'ReadinessFeedack';
 
-opt.feedback.blocks = {'Training1','Phase1','Training2','Phase2'};
+opt.feedback.blocks = {'Practice_Phase1','Phase1','Practice_Phase2','Phase2'};
 
-listen_to_keyboard = [0 0 0 0];
 show_feedback = [0 0 1 1];
 
-end_pause_counter_type = [1 % button presses
-                          1 % button presses
-                          4 % seconds
-                          4 % seconds 
-                          ];
-end_after_x_events = [10
-                      100
-                      1*60
-                      60*60
-                      ];
+end_after_x_bps = [10
+                   100
+                   10
+                   100
+                   ];
                   
-pause_every_x_events = [10
-                        20
-                        1*60
-                        15*60
-                        ];
+pause_every_x_bps = [10
+                    25
+                    10
+                    25
+                    ];
 
 for ii = 1:length(opt.feedback.blocks)
     
-    opt.feedback.pyff_params(ii).listen_to_keyboard = int16(listen_to_keyboard(ii));
     opt.feedback.pyff_params(ii).show_feedback = int16(show_feedback(ii));
-    opt.feedback.pyff_params(ii).end_pause_counter_type = int16(end_pause_counter_type(ii));
-    opt.feedback.pyff_params(ii).end_after_x_events = int16(end_after_x_events(ii));
-    opt.feedback.pyff_params(ii).pause_every_x_events = int16(pause_every_x_events(ii));
+    opt.feedback.pyff_params(ii).end_after_x_bps = int16(end_after_x_bps(ii));
+    opt.feedback.pyff_params(ii).pause_every_x_bps = int16(pause_every_x_bps(ii));
+
     
 end
 
 %%
-clear  Wps Ws n listen_to_keyboard show_feedback end_after_x_events end_pause_counter_type pause_every_x_events
+clear  ii Wps Ws n show_feedback end_after_x_bps pause_every_x_bps
 
 
 

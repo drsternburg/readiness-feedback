@@ -17,7 +17,7 @@ bbci_trigger_parport(10,BTB.Acq.IoLib,BTB.Acq.IoAddr);
 bbci = tl_bbci_setup;
 
 %% Training for Phase 1
-rfb_startRecording('Training1',bbci)
+rfb_startRecording('Practice_Phase1',bbci)
 
 %% Phase 1
 rfb_startRecording('Phase1',bbci)
@@ -37,7 +37,7 @@ bbci = rfb_bbci_setup;
 opt.feedback.pyff_params(3).phase1_cout = cout;
 
 %% Training for Phase 2
-tl_acq_startRecording('Training2',bbci)
+tl_acq_startRecording('Practice_Phase2',bbci)
 
 %% Phase 2
 tl_acq_startRecording('Phase2',bbci)
