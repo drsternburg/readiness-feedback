@@ -330,6 +330,7 @@ class Feedback(object):
             self.send_udp(data)
         if self._pport:
             if sys.platform == 'win32':
+                print(data)
                 self._pport.Out32(self._port_num, data)
             else:
                 self._pport.setData(data)
