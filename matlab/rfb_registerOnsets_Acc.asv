@@ -1,23 +1,18 @@
 
-function rfb_registerOnsets_Acc(subj_code,phase_name)
+function rfb_registerOnsets_Acc(subj_code)
 
 global opt BTB
 
-[mrk_orig,cnt] = rfb_loadData(subj_code,phase_name);
+[mrk_orig,cnt] = rfb_loadData(subj_code,'Phase1');
 
 cnt = proc_selectChannels(cnt,'Acc*');
 dt = 1000/cnt.fs;
 
 trial_mrk = rfb_getTrialMarkers(mrk_orig);
-
-%%% !!!
-%trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==3);
-trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
-
 mrk = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
-mrk = mrk_selectClasses(mrk,{'trial start','pedal press'});
-
-Nt = sum(mrk.y(1,:));
+mrk_ts = mrk_selectClasses(mrk,'trial start');
+mrk_pp = mrk_selectClasses(mrk,'pedal press');
+Nt = sum(mrk_pp.y(1,:));
 i_trial = reshape(1:Nt*2,2,Nt);
 
 t_onset = nan(Nt,1);
@@ -73,7 +68,7 @@ end
 ds_list = dir(BTB.MatDir);
 ds_idx = strncmp(subj_code,{ds_list.name},5);
 ds_name = ds_list(ds_idx).name;
-filename = sprintf('%s%s/%s_%s_%s_mrk',BTB.MatDir,ds_name,opt.session_name,phase_name,subj_code);
+filename = sprintf('%s%s/%s_%s_%s_mrk',BTB.MatDir,ds_name,opt.session_name,'Phase1',subj_code);
 save(filename,'mrk')
 
 

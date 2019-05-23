@@ -9,7 +9,7 @@ ds_name = ds_list(ds_idx).name;
 
 session_name = 'ReadinessFeedback';
 
-filename_eeg = sprintf('%s/%s_%s_%s',ds_name,session_name,phase_name,subj_code);
+filename_eeg = sprintf('%s\\%s_%s_%s',ds_name,session_name,phase_name,subj_code);
 filename_mrk = sprintf('%s%s_mrk.mat',BTB.MatDir,filename_eeg);
 
 fprintf('Loading data set %s, %s...\n',ds_name,phase_name)

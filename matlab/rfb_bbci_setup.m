@@ -7,6 +7,7 @@ bbci = struct;
 
 bbci.source.acquire_fcn = @bbci_acquire_bv;
 bbci.source.min_blocklength = 10;
+bbci.source.acquire_param = {struct('fs',opt.acq.fs,'filt_b',opt.acq.filt.b,'filt_a',opt.acq.filt.a)};
 
 % EEG
 bbci.signal(1).source = 1;

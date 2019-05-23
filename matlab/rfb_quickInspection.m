@@ -8,6 +8,7 @@ global opt
 %% prepare data
 [mrk,cnt,mnt] = rfb_loadData(subj_code,'Phase1');
 trial_mrk = rfb_getTrialMarkers(mrk);
+trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
 mrk = mrk_selectEvents(mrk,[trial_mrk{:}]);
 mrk = mrk_selectClasses(mrk,{'trial start','movement onset'});
 

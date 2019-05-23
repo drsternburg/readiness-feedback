@@ -21,7 +21,7 @@ basename = sprintf('%s_%s_',opt.session_name,'Phase1');
 filename = fullfile(BTB.Tp.Dir(end-13:end),[basename BTB.Tp.Code]);
 rfb_convertBVData(filename);
 rfb_initialCleanup(BTB.Tp.Code,'Phase1');
-rfb_registerOnsets_Acc(BTB.Tp.Code);
+rfb_registerOnsets_Acc(BTB.Tp.Code,'Phase1');
 
 %% Inspect data
 cout = rfb_quickInspection(BTB.Tp.Code);
@@ -49,6 +49,7 @@ opt.cfy_acc.C = train_RLDAshrink(fv.x,fv.y);
 %% update BBCI and set cout
 bbci = rfb_bbci_setup;
 opt.feedback.pyff_params(3).phase1_cout = cout;
+opt.feedback.pyff_params(4).phase1_cout = cout;
 
 %% Training for Phase 2
 rfb_startRecording('Practice_Phase2',bbci)
