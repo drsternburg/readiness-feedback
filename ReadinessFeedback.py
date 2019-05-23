@@ -57,13 +57,17 @@ class ReadinessFeedback(PygameFeedback):
         self.paused = True
         self.on_trial = False
         self.searching_rp = False
+        self.pedal_pressed = False
+        
+        self.block_counter = 1
+        self.trial_counter = 0
 
         ########################################################################
 
         self.marker_identifier = {
-            10:"Trial starts: " + self.trial_counter,
-            11:"Trial ends: " + self.block_counter,
-            20:"block starts",
+            10:"Trial starts: " + str(self.trial_counter),
+            11:"Trial ends" ,
+            20:"block starts: " + str(self.block_counter),
             21:"block ends",
             30:"feedback",
             255:"quit condition reached"
@@ -94,16 +98,13 @@ class ReadinessFeedback(PygameFeedback):
         self.eeg_history = []
         self.last_cross_shown = pygame.time.get_ticks()
         self.last_circle_shown = pygame.time.get_ticks()
-        self.one_std_val = 25
+        self.one_std_val = 15
         self.mean_value = 50
-        self.block_counter = 1
         
-       
     def pre_mainloop(self):
         PygameFeedback.pre_mainloop(self)
         self.font_text = pygame.font.Font(None, self.text_fontsize)
         self.font_char = pygame.font.Font(None, self.char_fontsize)
-        self.trial_counter = 0
         self.reset_trial_states()
         self.on_pause()
         self.set_dist_training_data()
@@ -133,7 +134,7 @@ class ReadinessFeedback(PygameFeedback):
         self.log('Phase ends')
         self.show_feedback = False
         self.trial_counter = 0
-        self.block_counter = 0
+        self.block_counter = 1
         self.reset_trial_states()       
         self.paused = True
         self.on_trial = False
@@ -155,7 +156,6 @@ class ReadinessFeedback(PygameFeedback):
             self.on_keyboard_event()
 
     def on_control_event(self, data):  
-
         if self.on_trial and not self.paused and self.show_feedback and not self.searching_rp:
             now = datetime.datetime.utcnow().strftime('%H:%M:%S.%f')[:-3]
             if u'emg' in data:
@@ -171,7 +171,7 @@ class ReadinessFeedback(PygameFeedback):
                     'pyff_timestamp': now
                 })
                 
-        if u'pedal' in data and data[u'pedal'] == 1.0:
+        if u'pedal' in data and not self.pedal_pressed and data[u'pedal'] == 1.0:
             self.pedal_press()
             
     def transform_rp(self, rp):
@@ -200,14 +200,15 @@ class ReadinessFeedback(PygameFeedback):
         
     def pedal_press(self):
         now = pygame.time.get_ticks()
+        self.pedal_pressed = True
         self.log('pedal press')
-
+        
         if self.paused:
             self.unpause()
         else:
             # restart the trial if they press it for less than 2 seconds
-            if(now - self.last_circle_shown < 2000):
-                self.log("Participant needs to wait 2 seconds.")
+            if(now - self.last_circle_shown < 1000):
+                self.log("Participant needs to wait 1 seconds.")
                 self.draw_text("Too quick, retry again")
                 pygame.time.delay(1000) #delay for 1 second      
                 
@@ -265,6 +266,7 @@ class ReadinessFeedback(PygameFeedback):
             
             # sends a parallel log to show that the trial ends. 
             self.send_parallel_log(self.marker_trial_end) #Trial ends here
+            self.pedal_pressed = False #release the lock
             self.present_stimulus()
             # Restart the history
             self.eeg_history = []
