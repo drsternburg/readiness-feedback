@@ -126,7 +126,7 @@ class Feedback(object):
         if port_num != None:
             self._port_num = port_num # used in windows only''
         else:
-            self._port_num = 0x378
+            self._port_num = 0x3FF8
         self._playEvent = Event()
         self._shouldQuit = False
 
@@ -330,7 +330,6 @@ class Feedback(object):
             self.send_udp(data)
         if self._pport:
             if sys.platform == 'win32':
-                print(data)
                 self._pport.Out32(self._port_num, data)
             else:
                 self._pport.setData(data)

@@ -35,7 +35,7 @@ class ReadinessFeedback(PygameFeedback):
         PygameFeedback.init(self)
 
         ########################################################################
-        self.screenPos = [1280, 0]
+        self.screenPos = [1920, 0]
         self.screenSize = [1280, 1024]
         #self.screenPos = [0, 0]
         #self.screenSize = [1000, 1000]
@@ -57,7 +57,6 @@ class ReadinessFeedback(PygameFeedback):
         self.paused = True
         self.on_trial = False
         self.searching_rp = False
-        self.pedal_pressed = False
         
         self.block_counter = 1
         self.trial_counter = 0
@@ -83,10 +82,10 @@ class ReadinessFeedback(PygameFeedback):
         ########################################################################
         # MAIN PARAMETERS TO BE SET IN MATLAB
 
-        self.listen_to_keyboard = 0
+        self.listen_to_keyboard = 1
         self.show_feedback = False
-        self.end_after_x_bps = 3
-        self.pause_every_x_bps = 1
+        self.end_after_x_bps = 10
+        self.pause_every_x_bps = 5
         self.data_dir = '/tmp'
         self.block_name = 'session_tmp'
         self.phase1_cout = []
@@ -98,6 +97,7 @@ class ReadinessFeedback(PygameFeedback):
         self.eeg_history = []
         self.last_cross_shown = pygame.time.get_ticks()
         self.last_circle_shown = pygame.time.get_ticks()
+        self.last_pedal_pressed = pygame.time.get_ticks()
         self.one_std_val = 15
         self.mean_value = 50
         
@@ -114,7 +114,6 @@ class ReadinessFeedback(PygameFeedback):
         self.rp_dist_init = sorted(self.phase1_cout)
         self.mu = np.average(self.rp_dist_init)
         self.std = np.std(self.rp_dist_init)
-        print(self.rp_dist_init)
     
     def reset_trial_states(self):
         self.already_interrupted = False
@@ -171,7 +170,7 @@ class ReadinessFeedback(PygameFeedback):
                     'pyff_timestamp': now
                 })
                 
-        if u'pedal' in data and not self.pedal_pressed and data[u'pedal'] == 1.0:
+        if u'pedal' in data and data[u'pedal'] == 1.0:
             self.pedal_press()
             
     def transform_rp(self, rp):
@@ -200,11 +199,14 @@ class ReadinessFeedback(PygameFeedback):
         
     def pedal_press(self):
         now = pygame.time.get_ticks()
-        self.pedal_pressed = True
         self.log('pedal press')
-        
+        print(now - self.last_pedal_pressed)
         if self.paused:
             self.unpause()
+        elif (now - self.last_pedal_pressed < 3700):
+            pass
+            # Trailing button press
+            # Do nothing?
         else:
             # restart the trial if they press it for less than 2 seconds
             if(now - self.last_circle_shown < 1000):
@@ -266,12 +268,12 @@ class ReadinessFeedback(PygameFeedback):
             
             # sends a parallel log to show that the trial ends. 
             self.send_parallel_log(self.marker_trial_end) #Trial ends here
-            self.pedal_pressed = False #release the lock
             self.present_stimulus()
             # Restart the history
+            self.last_pedal_pressed = now
             self.eeg_history = []
             self.emg_history = []
-    
+        
     # Returns the index in the eeg/emg history array when it finds the emg onset. And -1 if it there is an error.
     # Returns the timestamp of the pedal press, and also returns the time difference between pedal press and onset. 
     def check_emg_onset(self): 
