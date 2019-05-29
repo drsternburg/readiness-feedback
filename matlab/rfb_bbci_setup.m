@@ -55,7 +55,7 @@ bbci.feedback(3).receiver= 'pyff';
 
 bbci.quit_condition.marker = -255;
 
-bbci.log.output = 'screen&file';
+bbci.log.output = 'file';
 %bbci.log.filebase = '~/bbci/log/log';
 bbci.log.classifier = 1;
 

@@ -11,8 +11,8 @@ dt = 1000/cnt.fs;
 trial_mrk = rfb_getTrialMarkers(mrk_orig);
 
 %%% !!!
-%trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==3);
-trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
+trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==3);
+%trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
 
 mrk = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
 mrk = mrk_selectClasses(mrk,{'trial start','pedal press'});
