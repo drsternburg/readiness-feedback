@@ -35,7 +35,7 @@ class ReadinessFeedback(PygameFeedback):
         PygameFeedback.init(self)
 
         ########################################################################
-        self.screenPos = [1920, 0]
+        self.screenPos = [1280, 0]
         self.screenSize = [1280, 1024]
         #self.screenPos = [0, 0]
         #self.screenSize = [1000, 1000]
@@ -82,7 +82,7 @@ class ReadinessFeedback(PygameFeedback):
         ########################################################################
         # MAIN PARAMETERS TO BE SET IN MATLAB
 
-        self.listen_to_keyboard = 1
+        self.listen_to_keyboard = 0
         self.show_feedback = False
         self.end_after_x_bps = 10
         self.pause_every_x_bps = 5
@@ -200,7 +200,6 @@ class ReadinessFeedback(PygameFeedback):
     def pedal_press(self):
         now = pygame.time.get_ticks()
         self.log('pedal press')
-        print(now - self.last_pedal_pressed)
         if self.paused:
             self.unpause()
         elif (now - self.last_pedal_pressed < 3700):
@@ -297,8 +296,8 @@ class ReadinessFeedback(PygameFeedback):
                 pedal_timestamp = float(pedal_timestamp_str[-6:]) * 1000
                 press_onset_diff = pedal_timestamp - onset_timestamp
                 print(press_onset_diff)
-                if press_onset_diff > 1000 or press_onset_diff < 100:
-                    return_index = -1
+                # if press_onset_diff > 1000 or press_onset_diff < 100:
+                    # return_index = -1
             
             i -= 1
         return return_index, pedal_timestamp_str, press_onset_diff
