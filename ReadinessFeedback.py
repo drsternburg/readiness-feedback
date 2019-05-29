@@ -251,6 +251,7 @@ class ReadinessFeedback(PygameFeedback):
                 
                 if self.trial_counter == self.end_after_x_bps :
                     self.send_parallel_log(self.marker_trial_end) #Trial ends here
+                    pygame.time.delay(10) # Pause for 10 ms to let the marker be sent
                     self.send_parallel_log(self.marker_block_end) #Block ends here
                     self.end_session()
                     return
@@ -259,6 +260,7 @@ class ReadinessFeedback(PygameFeedback):
                 # Or to give the user time to think the next strategy 
                 if self.trial_counter > 0 and self.trial_counter % self.pause_every_x_bps == 0:
                     self.send_parallel_log(self.marker_trial_end) #Trial ends here
+                    pygame.time.delay(10) # Pause for 10 ms to let the marker be sent
                     self.send_parallel_log(self.marker_block_end) #Block ends here
                     self.block_counter += 1
                     self.reset_trial_states()
