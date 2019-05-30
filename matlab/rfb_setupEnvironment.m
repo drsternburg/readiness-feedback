@@ -43,8 +43,8 @@ opt.acc.offset = 500;
 
 %% parameters for classification
 %opt.cfy_rp.clab = {'not','E*','Acc*'};
-%opt.cfy_rp.clab = {'FC1','FC2','C1','Cz','C2'};
-opt.cfy_rp.clab = {'FC2','Cz','C2'};
+opt.cfy_rp.clab = {'FC1','FC2','C1','Cz','C2','Fz','F1','F2'};
+%opt.cfy_rp.clab = {'FC2','Cz','C2'};
 
 opt.cfy_rp.ival_baseln = [-100 0];
 opt.cfy_rp.ival_fv = [-1000 -900;
