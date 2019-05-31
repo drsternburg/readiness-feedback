@@ -38,8 +38,9 @@ opt.mrk.def = { 2 'pedal press';...
                }';
 
 %% parameters for finding movement onsets (accelerator)
-opt.acc.ival = [-50 0];
+opt.acc.ival = [-150 0];
 opt.acc.offset = 500;
+opt.acc.min_mo2pp = 150;
 
 %% parameters for classification
 %opt.cfy_rp.clab = {'not','E*','Acc*'};
