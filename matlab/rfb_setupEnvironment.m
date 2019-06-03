@@ -28,7 +28,6 @@ Wps = [42 49]/opt.acq.orig_fs*2;
 opt.acq.fs = 100;
 
 %% markers
-opt.mrk.min_ts2emg = 1500;
 opt.mrk.def = { 2 'pedal press';...
                -30 'feedback'; ...
                -10 'trial start';...
@@ -40,7 +39,6 @@ opt.mrk.def = { 2 'pedal press';...
 %% parameters for finding movement onsets (accelerator)
 opt.acc.ival = [-150 0];
 opt.acc.offset = 500;
-opt.acc.min_mo2pp = 150;
 
 %% parameters for classification
 %opt.cfy_rp.clab = {'not','E*','Acc*'};
