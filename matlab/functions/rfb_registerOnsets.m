@@ -1,19 +1,21 @@
 
-function rfb_registerOnsets_Acc(subj_code,phase_name)
+function mrk = rfb_registerOnsets_Acc(subj_code,phase_name)
 
 global opt BTB
 
 [mrk_orig,cnt] = rfb_loadData(subj_code,phase_name);
+mrk_orig = mrk_selectClasses(mrk_orig,'not','movement onset');
 
 cnt = proc_selectChannels(cnt,'Acc*');
 dt = 1000/cnt.fs;
 
 trial_mrk = rfb_getTrialMarkers(mrk_orig);
-
-%%% !!!
-trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==3);
-%trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
-
+switch phase_name
+    case 'Phase1'
+        trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==3);
+    case 'Phase2'
+        trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
+end
 mrk = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
 mrk = mrk_selectClasses(mrk,{'trial start','pedal press'});
 
@@ -34,37 +36,59 @@ for jj = 1:Nt
     
     mrk_trial = mrk_selectEvents(mrk,i_trial(:,jj));
     T = [mrk_trial.time(1)+opt.acc.offset mrk_trial.time(2)];
-    t = T(1);
-    while t <=T(2)
+    t = T(2);
+    while t >=T(1)
         fv = proc_segmentation(cnt,t,opt.acc.ival);
         fv = proc_variance(fv);
         fv = proc_logarithm(fv);
         fv = proc_flaten(fv);
         cout = apply_separatingHyperplane(C,fv.x(:));
-        if cout>0
+        if cout<0
             t_onset(jj) = t;
             break
         end
-        t = t+dt;
+        t = t-dt;
     end
     
 end
-fprintf('%d Movement onsets assigned to %d trials.\n',sum(not(isnan(t_onset))),Nt)
+t_onset(isnan(t_onset)) = [];
+
+%% exclude outliers
+mrk = mrk_selectClasses(mrk,'pedal press');
+mrk2.time = t_onset;
+mrk2.y = ones(1,length(t_onset));
+mrk2.className = {'movement onset'};
+mrk = mrk_mergeMarkers(mrk,mrk2);
+mrk = mrk_sortChronologically(mrk);
+t_mo2pp = mrk.time(logical(mrk.y(1,:))) - mrk.time(logical(mrk.y(2,:)));
+ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3)|(t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3);
+t_onset(ind_excl) = [];
+t_mo2pp(ind_excl) = [];
+fprintf('%d Movement onsets assigned to %d trials.\n',length(t_onset),Nt)
+fprintf('%d Movement onsets excluded as outliers.\n',sum(ind_excl))
 
 %% insert new markers
-t_onset(isnan(t_onset)) = [];
 mrk2.time = t_onset;
 mrk2.y = ones(1,length(t_onset));
 mrk2.className = {'movement onset'};
 mrk = mrk_mergeMarkers(mrk_orig,mrk2);
 mrk = mrk_sortChronologically(mrk);
 
-%% plot
-epo = proc_segmentation(cnt,mrk_selectClasses(mrk,'movement onset'),[-1000 1000]);
+%% plots
 figure
 clrs = lines;
+
+subplot(4,1,1)
+if verLessThan('matlab', '8.4')
+    hist(t_mo2pp)
+else
+    histogram(t_mo2pp)
+end
+
+epo = proc_segmentation(cnt,mrk_selectClasses(mrk,'movement onset'),[-1000 1000]);
+epo = proc_baseline(epo,500,'beginning');
 for jj = 1:3
-    subplot(3,1,jj)
+    subplot(4,1,jj+1)
     plot(epo.t,squeeze(squeeze(epo.x(:,jj,:))),'color',clrs(jj,:))
     title(epo.clab{jj})
 end
