@@ -1,4 +1,4 @@
-function [source, marker]= bbci_apply_acquireData(source, bbci_source, marker)
+function [source, marker]= bbci_apply_acquireData_lsl(source, bbci_source, marker)
 %BBCI_APPLY_ACQUIREDATA - Fetch data from acquisition hardware
 %
 %Synopsis:
@@ -50,10 +50,10 @@ while run
         if isempty(marker.desc)
           % INIT case: We do the init here (and not in bbci_apply_initData),
           % since we can determine here the marker format (numeric or string).
-          if iscell(mrkDesc)
-            marker.desc= cell(1, length(marker.time));
-          else
-            marker.desc= NaN*ones(1, length(marker.time));
+            if iscell(mrkDesc)
+                marker.desc= cell(1, length(marker.time));
+            else
+                marker.desc= NaN*ones(1, length(marker.time));
             end
         end
     end
@@ -74,10 +74,10 @@ while run
     end
 
     nMarkersPerBlock= nMarkersPerBlock + nNewMarkers;
-    source.x= cat(1, source.x, new_data);
+    source.x= cat(1, source.x, new_data); 
     source.sample_no= source.sample_no + size(new_data,1);
     source.time= source.sample_no*1000/source.fs; % TODO: I think this is where I can use the timestamps
-    run= (size(source.x,1) < bbci_source.min_blocklength_sa);
+    run= (size(source.x,2) < bbci_source.min_blocklength_sa);
 
     pause(0.001); % I wonder if I need this, but basically I need a small window for pause to receive some data...
 
