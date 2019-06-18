@@ -11,7 +11,7 @@ logfilename = sprintf('%s%s/%s_%s_',BTB.RawDir,ds_name,opt.session_name,phase_na
 
 fid = fopen(logfilename);
 
-D = textscan(fid,'[%f sec] %s %s %f %d %s %s %s %f','delimiter','|','CollectOutput',1);
+D = textscan(fid,'[%f sec] %s %s %f %f %s %s %s %f','delimiter','|','CollectOutput',1);
 
 Nt = length(D{1});
 
@@ -24,8 +24,8 @@ for ii = 1:Nt
     d = textscan(D{2}{ii,2},'Trial: %d');
     L.trial_nr(ii) = d{1};
 end
-L.cout = D{3};
-L.feedback = D{4};
-L.t_mo2pp = D{6};
+L.cout = D{3}(:,1);
+L.feedback = D{3}(:,2);
+L.t_mo2pp = D{5};
 
 

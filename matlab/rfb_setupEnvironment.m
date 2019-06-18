@@ -8,7 +8,7 @@ opt.session_name = 'ReadinessFeedback';
 if ispc
     BTB.PrivateDir = 'C:\bbci';
 end
-addpath(fullfile(BTB.PrivateDir,'readiness-feedback','matlab'))
+addpath(fullfile(BTB.PrivateDir,'readiness-feedback','matlab','functions'))
 
 %%
 BTB.Acq.Geometry = [1281 1 1280 998];
@@ -37,7 +37,7 @@ opt.mrk.def = { 2 'pedal press';...
                }';
 
 %% parameters for finding movement onsets (accelerator)
-opt.acc.ival = [-150 0];
+opt.acc.ival = [-200 0];
 opt.acc.offset = 500;
 
 %% parameters for classification
