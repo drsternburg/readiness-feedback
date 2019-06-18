@@ -1,8 +1,10 @@
 
-function rfb_startRecording(block_name,bbci)
+function rfb_startRecording(block_name)
 % Executes a recording block
 
 global opt BTB
+
+bbci = rfb_bbci_setup;
 
 id = logical(strcmp(opt.feedback.blocks,block_name));
 

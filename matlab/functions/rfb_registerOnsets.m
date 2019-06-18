@@ -1,5 +1,5 @@
 
-function mrk = rfb_registerOnsets_Acc(subj_code,phase_name)
+function mrk = rfb_registerOnsets(subj_code,phase_name)
 
 global opt BTB
 
@@ -19,6 +19,15 @@ end
 mrk = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
 mrk = mrk_selectClasses(mrk,{'trial start','pedal press'});
 
+%% train online detector
+mrk_train.time(logical(mrk.y(1,:))) = mrk.time(logical(mrk.y(1,:)))+opt.acc.offset;
+fv = proc_segmentation(cnt,mrk_train,opt.acc.ival);
+fv = proc_variance(fv);
+fv = proc_logarithm(fv);
+fv = proc_flaten(fv);
+opt.cfy_acc.C = train_RLDAshrink(fv.x,fv.y);
+
+%% find single-trial onsets with cross-validated detector
 Nt = sum(mrk.y(1,:));
 i_trial = reshape(1:Nt*2,2,Nt);
 
