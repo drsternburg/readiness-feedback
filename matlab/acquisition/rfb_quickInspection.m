@@ -1,7 +1,5 @@
 
 function rfb_quickInspection(subj_code)
-% Performs a quick inspection of recorded Phase1 data and returns the
-% waiting times
 
 global opt
 
