@@ -1,7 +1,5 @@
 
-function cout = rfb_quickInspection(subj_code)
-% Performs a quick inspection of recorded Phase1 data and returns the
-% waiting times
+function rfb_quickInspection(subj_code)
 
 global opt
 
@@ -22,9 +20,12 @@ opt.cfy_rp.C = train_RLDAshrink(fv.x,fv.y);
 
 fv = proc_flaten(fv);
 [loss,~,cout] = crossvalidation(fv,@train_RLDAshrink,'SampleFcn',@sample_leaveOneOut);
-cout = cout(logical(fv.y(2,:)));
 acc = 100*(1-loss);
 fprintf('\nClassification accuracy: %2.1f\n',acc)
+
+%% Set cout for feedback
+opt.feedback.pyff_params(3).phase1_cout = cout(logical(fv.y(2,:)));
+opt.feedback.pyff_params(4).phase1_cout = cout(logical(fv.y(2,:)));
 
 %% waiting time histogram
 ci_emg = strcmp(mrk.className,'movement onset');

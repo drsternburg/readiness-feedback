@@ -201,7 +201,7 @@ class ReadinessFeedback(PygameFeedback):
         
     def pedal_press(self):
         now = pygame.time.get_ticks()
-        self.log('pedal press')
+        self.log('pedal press: trial ' + str(self.trial_counter))
         if self.paused:
             self.unpause()
         elif (now - self.last_pedal_pressed < 3700):
