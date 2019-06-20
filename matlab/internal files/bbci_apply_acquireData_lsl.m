@@ -77,9 +77,10 @@ while run
     source.x= cat(1, source.x, new_data); 
     source.sample_no= source.sample_no + size(new_data,1);
     source.time= source.sample_no*1000/source.fs; % TODO: I think this is where I can use the timestamps
+%     size(source.x,1)
     run= (size(source.x,1) < bbci_source.min_blocklength_sa);
 
-    pause(0.001); % TODO: I wonder if I need this, but basically I need a small window for pause to receive some data...
+%     pause(0.1); % TODO: I wonder if I need this, but basically I need a small window for pause to receive some data...
 
 end
 

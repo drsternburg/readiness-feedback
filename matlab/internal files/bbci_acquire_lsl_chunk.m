@@ -1,4 +1,4 @@
-function varargout= bbci_acquire_lsl(varargin)
+function varargout= bbci_acquire_lsl_chunk(varargin)
 %BBCI_ACQUIRE_lsl - Online data acquisition from labstreaming layer (LSL)
 %   This function acquires small blocks of signals including meta
 %   information from the LSL. The LSL can hold streams from any common
@@ -75,6 +75,7 @@ if isequal(varargin{1}, 'init'),
     for i = drange(1:numOfAmp)
         if i == 1
            opts = opt_setDefaults(proplist(i).props, props, 1);
+           opts.state(1) = opt_setDefaults(proplist(i).props, props, 1);
         else
            opts.state(i-1) = opt_setDefaults(proplist(i).props, props, 1);
         end
@@ -121,7 +122,7 @@ if isequal(varargin{1}, 'init'),
     else
         % create a new inlet
         % save lsl structures to state structure
-        for i = drange(2:numOfAmp)
+        for i = drange(1:numOfAmp)
             opts.state(i-1).inlet.x = lsl_inlet(eeg{opts.state(i-1).eeg_amp_num}, 'chunksize', opts.state(i-1).chunk_size);
             opts.state(i-1).inlet.x.set_postprocessing(opts.state(i-1).post_processing_option);
             [~, opts.state(i-1).starttime] = opts.state(i-1).inlet.x.pull_sample();
@@ -140,7 +141,7 @@ if isequal(varargin{1}, 'init'),
     % resolve marker stream, try several times
     mrks = {};
     
-    for i = drange(2:numOfAmp)
+    for i = drange(1:numOfAmp)
         mrks(i-1) = lsl_resolve_byprop(lib, 'name', opts.state(i-1).markerstreamname, 1, 1);
         
         if isempty(mrks(i-1))        
@@ -192,8 +193,12 @@ else % this is the running condition that receives and returns the samples
     % current sample.
     timeout = 0; % in seconds
     
-    size_opts_state = size(opts.state);
-    numOfAmp = size_opts_state(2);
+    if isfield(opts,'state')==1
+        size_opts_state = size(opts.state);
+        numOfAmp = size_opts_state(2);
+    else
+        numOfAmp = 1;
+    end
     cntx = [];
     ts = [];
     for i = drange(1:numOfAmp)  
