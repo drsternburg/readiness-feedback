@@ -14,6 +14,7 @@ bbci= bbci_apply_setDefaults(bbci);
 [data, bbci]= bbci_apply_initData(bbci);
 
 run= true;
+tic
 while run,
   for k= 1:length(bbci.source),
     [data.source(k), data.marker]= ...
@@ -77,4 +78,5 @@ while run,
   [bbci, data]= bbci_apply_adaptation(bbci, data);
   run= bbci_apply_evalQuitCondition(data.marker, bbci, data.log.fid);
 end
+toc
 bbci_apply_close(bbci, data);
