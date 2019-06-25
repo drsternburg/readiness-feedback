@@ -1,5 +1,5 @@
 %% preprocess
-filename = 'VPfad_19_05_29/ReadinessFeedback_Phase2_VPfad';
+filename = 'VPfae_19_06_18/ReadinessFeedback_Phase2_VPfae';
 rfb_convertBVData(filename);
 
 
