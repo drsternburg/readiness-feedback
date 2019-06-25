@@ -15,10 +15,10 @@ cnt_xv = proc_selectChannels(cnt,opt.cfy_rp.clab);
 fv = proc_segmentation(cnt_xv,mrk,opt.cfy_rp.fv_window);
 fv = proc_baseline(fv,opt.cfy_rp.ival_baseln);
 fv = proc_jumpingMeans(fv,opt.cfy_rp.ival_fv);
+fv = proc_flaten(fv);
 
 opt.cfy_rp.C = train_RLDAshrink(fv.x,fv.y);
 
-fv = proc_flaten(fv);
 [loss,~,cout] = crossvalidation(fv,@train_RLDAshrink,'SampleFcn',@sample_leaveOneOut);
 acc = 100*(1-loss);
 fprintf('\nClassification accuracy: %2.1f\n',acc)

@@ -9,9 +9,9 @@ bbci_trigger_parport(10,BTB.Acq.IoLib,BTB.Acq.IoAddr);
 
 
 %% Training for Phase 1
-rfb_startRecording('Practice_Phase1')
+rfb_startRecording('Practice_Phase1',6,3)
 %% Phase 1
-rfb_startRecording('Phase1')
+rfb_startRecording('Phase1',100,25)
 
 
 %% Preprocess
@@ -24,7 +24,7 @@ rfb_quickInspection(BTB.Tp.Code);
 save([fullfile(BTB.Tp.Dir,opt.session_name) '_' BTB.Tp.Code '_opt'],'opt')
 
 %% Training for Phase 2
-rfb_startRecording('Practice_Phase2')
+rfb_startRecording('Practice_Phase2',6,3)
 %% Phase 2
-rfb_startRecording('Phase2')
+rfb_startRecording('Phase2',100,25)
 

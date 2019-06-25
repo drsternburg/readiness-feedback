@@ -80,18 +80,6 @@ opt.feedback.blocks = {'Practice_Phase1','Phase1','Practice_Phase2','Phase2'};
 
 show_feedback = [0 0 1 1];
 
-end_after_x_bps = [2
-                   50
-                   4
-                   100
-                   ];
-                  
-pause_every_x_bps = [2
-                    25
-                    2
-                    25
-                    ];
-
 for ii = 1:length(opt.feedback.blocks)
     
     opt.feedback.pyff_params(ii).show_feedback = int16(show_feedback(ii));
@@ -102,7 +90,7 @@ for ii = 1:length(opt.feedback.blocks)
 end
 
 %%
-clear  ii Wps Ws n show_feedback end_after_x_bps pause_every_x_bps
+clear  ii Wps Ws n show_feedback
 
 
 
