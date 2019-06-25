@@ -19,6 +19,16 @@ end
 mrk = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
 mrk = mrk_selectClasses(mrk,{'trial start','pedal press'});
 
+%% train online detector
+mrk_train = mrk;
+mrk_train.time(logical(mrk.y(1,:))) = mrk_train.time(logical(mrk_train.y(1,:)))+opt.acc.offset;
+fv = proc_segmentation(cnt,mrk_train,opt.acc.ival);
+fv = proc_variance(fv);
+fv = proc_logarithm(fv);
+fv = proc_flaten(fv);
+opt.cfy_acc.C = train_RLDAshrink(fv.x,fv.y);
+
+%% find single-trial onsets with cross-validated detector
 Nt = sum(mrk.y(1,:));
 i_trial = reshape(1:Nt*2,2,Nt);
 
@@ -61,7 +71,9 @@ mrk2.className = {'movement onset'};
 mrk = mrk_mergeMarkers(mrk,mrk2);
 mrk = mrk_sortChronologically(mrk);
 t_mo2pp = mrk.time(logical(mrk.y(1,:))) - mrk.time(logical(mrk.y(2,:)));
-ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3)|(t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3);
+ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3)|...
+           (t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3)|...
+           (t_mo2pp<150); % physiologically implausible
 t_onset(ind_excl) = [];
 t_mo2pp(ind_excl) = [];
 fprintf('%d Movement onsets assigned to %d trials.\n',length(t_onset),Nt)

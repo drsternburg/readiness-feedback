@@ -8,7 +8,7 @@ opt.session_name = 'ReadinessFeedback';
 if ispc
     BTB.PrivateDir = 'C:\bbci';
 end
-addpath(fullfile(BTB.PrivateDir,'readiness-feedback','matlab'))
+addpath(fullfile(BTB.PrivateDir,'readiness-feedback','matlab','functions'))
 
 %%
 BTB.Acq.Geometry = [1281 1 1280 998];

@@ -7,19 +7,15 @@ acq_makeDataFolder;
 %% Test the triggers
 bbci_trigger_parport(10,BTB.Acq.IoLib,BTB.Acq.IoAddr);
 
-%% Setup BBCI for phase 1
-bbci = rfb_bbci_setup;
 
 %% Training for Phase 1
-rfb_startRecording('Practice_Phase1',bbci)
-
+rfb_startRecording('Practice_Phase1')
 %% Phase 1
-rfb_startRecording('Phase1',bbci)
+rfb_startRecording('Phase1')
+
 
 %% Preprocess
-basename = sprintf('%s_%s_',opt.session_name,'Phase1');
-filename = fullfile(BTB.Tp.Dir(end-13:end),[basename BTB.Tp.Code]);
-rfb_convertBVData(filename);
+rfb_convertBVData(BTB.Tp.Code,'Phase1');
 rfb_initialCleanup(BTB.Tp.Code,'Phase1');
 rfb_registerOnsets(BTB.Tp.Code,'Phase1');
 
@@ -46,21 +42,13 @@ fv = proc_logarithm(fv);
 fv = proc_flaten(fv);
 opt.cfy_acc.C = train_RLDAshrink(fv.x,fv.y);
 
-%% update BBCI and set cout
-bbci = rfb_bbci_setup;
-opt.feedback.pyff_params(3).phase1_cout = cout;
-opt.feedback.pyff_params(4).phase1_cout = cout;
+%% Register onsets, inspect EEG signals, train online classifiers and save opt file
+rfb_registerOnsets(BTB.Tp.Code,'Phase1');
+rfb_quickInspection(BTB.Tp.Code);
+save([fullfile(BTB.Tp.Dir,opt.session_name) '_' BTB.Tp.Code '_opt'],'opt')
 
 %% Training for Phase 2
-rfb_startRecording('Practice_Phase2',bbci)
-
+rfb_startRecording('Practice_Phase2')
 %% Phase 2
-rfb_startRecording('Phase2',bbci)
-
-%% Save options struct
-optfile = [fullfile(BTB.Tp.Dir,opt.session_name) '_' BTB.Tp.Code '_opt'];
-save(optfile,'opt')
-
-
-
+rfb_startRecording('Phase2')
 

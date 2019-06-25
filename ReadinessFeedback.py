@@ -35,7 +35,9 @@ class ReadinessFeedback(PygameFeedback):
         PygameFeedback.init(self)
 
         ########################################################################
-        self.screenPos = [1280, 0]
+        
+        # self.screenPos = [1280, 0]
+        self.screenPos = [1920, 0]
         self.screenSize = [1280, 1024]
         #self.screenPos = [0, 0]
         #self.screenSize = [1000, 1000]
@@ -199,7 +201,7 @@ class ReadinessFeedback(PygameFeedback):
         
     def pedal_press(self):
         now = pygame.time.get_ticks()
-        self.log('pedal press')
+        self.log('pedal press: trial ' + str(self.trial_counter))
         if self.paused:
             self.unpause()
         elif (now - self.last_pedal_pressed < 3700):
