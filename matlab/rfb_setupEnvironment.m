@@ -81,7 +81,7 @@ opt.feedback.blocks = {'Practice_Phase1','Phase1','Practice_Phase2','Phase2'};
 show_feedback = [0 0 1 1];
 
 end_after_x_bps = [2
-                   50
+                   100
                    4
                    100
                    ];
