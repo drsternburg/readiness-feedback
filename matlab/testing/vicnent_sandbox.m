@@ -1,6 +1,6 @@
 %% preprocess
-filename = 'VPfad_19_05_29/ReadinessFeedback_Phase2_VPfad';
-rfb_convertBVData(filename);
+filename = 'VPfae_19_06_18/ReadinessFeedback_Phase2_VPfae';
+rfb_convertBVData('VPfae','Phase2');
 
 
 %% Classifying stuff

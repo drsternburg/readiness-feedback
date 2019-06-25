@@ -249,7 +249,7 @@ class ReadinessFeedback(PygameFeedback):
                         # Present the RP value on screen
                         self.send_parallel_log(self.marker_rp_shown) #Sends the marker that the rp is being shown now.
                         self.draw_text(str(rp_val_transformed)) 
-                        pygame.time.delay(2000) #delay for 2 seconds then present the cross         
+                        pygame.time.delay(1500) #delay for 1.5 seconds
                 
                 if self.trial_counter == self.end_after_x_bps :
                     self.send_parallel_log(self.marker_trial_end) #Trial ends here
@@ -308,7 +308,7 @@ class ReadinessFeedback(PygameFeedback):
 
     def present_stimulus(self):
         threading.Thread(target = self.draw_fixation_cross).start() #draw cross
-        pygame.time.delay(2500) #delay for 2.5 seconds then white circle         
+        pygame.time.delay(2000) #delay for 2 seconds then white circle         
         threading.Thread(target = self.draw_circle, args=[self.white_color]).start() #draw white circle
         # sends a parallel log to show that the trial starts. 
         self.send_parallel_log(self.marker_trial_start)
