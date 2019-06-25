@@ -83,8 +83,8 @@ show_feedback = [0 0 1 1];
 for ii = 1:length(opt.feedback.blocks)
     
     opt.feedback.pyff_params(ii).show_feedback = int16(show_feedback(ii));
-    opt.feedback.pyff_params(ii).end_after_x_bps = int16(end_after_x_bps(ii));
-    opt.feedback.pyff_params(ii).pause_every_x_bps = int16(pause_every_x_bps(ii));
+%     opt.feedback.pyff_params(ii).end_after_x_bps = int16(end_after_x_bps(ii));
+%     opt.feedback.pyff_params(ii).pause_every_x_bps = int16(pause_every_x_bps(ii));
 
     
 end
