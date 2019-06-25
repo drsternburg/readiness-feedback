@@ -37,7 +37,7 @@ opt.mrk.def = { 2 'pedal press';...
                }';
 
 %% parameters for finding movement onsets (accelerator)
-opt.acc.ival = [-150 0];
+opt.acc.ival = [-200 0];
 opt.acc.offset = 500;
 
 %% parameters for classification
@@ -81,7 +81,7 @@ opt.feedback.blocks = {'Practice_Phase1','Phase1','Practice_Phase2','Phase2'};
 show_feedback = [0 0 1 1];
 
 end_after_x_bps = [2
-                   50
+                   100
                    4
                    100
                    ];

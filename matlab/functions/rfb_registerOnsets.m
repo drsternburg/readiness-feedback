@@ -1,5 +1,5 @@
 
-function mrk = rfb_registerOnsets_Acc(subj_code,phase_name)
+function mrk = rfb_registerOnsets(subj_code,phase_name)
 
 global opt BTB
 

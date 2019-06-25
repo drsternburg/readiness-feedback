@@ -21,7 +21,7 @@ basename = sprintf('%s_%s_',opt.session_name,'Phase1');
 filename = fullfile(BTB.Tp.Dir(end-13:end),[basename BTB.Tp.Code]);
 rfb_convertBVData(filename);
 rfb_initialCleanup(BTB.Tp.Code,'Phase1');
-rfb_registerOnsets_Acc(BTB.Tp.Code,'Phase1');
+rfb_registerOnsets(BTB.Tp.Code,'Phase1');
 
 %% Inspect data
 cout = rfb_quickInspection(BTB.Tp.Code);
