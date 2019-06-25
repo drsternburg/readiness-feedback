@@ -11,6 +11,10 @@ logfilename = sprintf('%s%s/%s_%s_',BTB.RawDir,ds_name,opt.session_name,phase_na
 
 fid = fopen(logfilename);
 
+if fid==-1
+    error('File %s not found.',logfilename)
+end
+
 D = textscan(fid,'[%f sec] %s %s %f %f %s %s %s %f','delimiter','|','CollectOutput',1);
 
 Nt = length(D{1});
