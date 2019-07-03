@@ -144,7 +144,7 @@ set(h5(1),'FaceAlpha', 0.3);
 h6=histfit(rp_all_blocks);
 set(h6(1),'FaceAlpha', 0.3);
 
-l=legend([h1(1) h2(1) h3(1) h4(1), h5(1), h6(1)],'block 1','block 2','block 3','block 4', 'phase1', 'phase2');
+l=legend([h1(1) h2(1) h3(1) h4(1), h5(1), h6],'block 1','block 2','block 3','block 4', 'phase1');
 set(l,'Interpreter','latex','FontSize',14)
 hold off
 
