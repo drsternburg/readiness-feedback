@@ -8,9 +8,6 @@ cnt = proc_selectChannels(cnt,'Acc*');
 dt = 1000/cnt.fs;
 
 mrk_orig = rfb_analyzeTrials(subj_code,phase_name);
-trial_mrk = rfb_getTrialMarkers(mrk_orig);
-trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
-mrk_orig = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
 mrk_orig = mrk_selectClasses(mrk_orig,'not','movement onset');
 mrk = mrk_selectClasses(mrk_orig,{'trial start','pedal press'});
 
@@ -59,7 +56,6 @@ end
 t_onset(isnan(t_onset)) = [];
 
 %% exclude outliers
-
 mrk = mrk_selectClasses(mrk,'pedal press');
 mrk2.time = t_onset;
 mrk2.y = ones(1,length(t_onset));

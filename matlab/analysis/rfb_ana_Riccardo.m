@@ -1,3 +1,10 @@
+%% preprocess
+
+rfb_preprocessing(subj_code,'Phase1');
+rfb_preprocessing(subj_code,'Phase2');
+rfb_preprocessing(subj_code,'Phase22');
+
+%% initialize
 
 subj_code = 'VPfaf';
 ival_rp = [-1200 0];
