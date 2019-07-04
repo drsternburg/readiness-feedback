@@ -1,4 +1,5 @@
 %% preprocess
+subj_code = 'VPfaf';
 
 rfb_preprocessing(subj_code,'Phase1');
 rfb_preprocessing(subj_code,'Phase2');
