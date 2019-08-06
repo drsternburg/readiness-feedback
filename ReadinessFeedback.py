@@ -36,8 +36,8 @@ class ReadinessFeedback(PygameFeedback):
 
         ########################################################################
         
-        # self.screenPos = [1280, 0]
-        self.screenPos = [1920, 0]
+        self.screenPos = [1280, 0]
+        # self.screenPos = [1920, 0]
         self.screenSize = [1280, 1024]
         #self.screenPos = [0, 0]
         #self.screenSize = [1000, 1000]
