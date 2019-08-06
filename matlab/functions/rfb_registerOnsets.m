@@ -3,21 +3,22 @@ function mrk = rfb_registerOnsets(subj_code,phase_name)
 
 global opt BTB
 
-[mrk_orig,cnt] = rfb_loadData(subj_code,phase_name);
-mrk_orig = mrk_selectClasses(mrk_orig,'not','movement onset');
-
+[~,cnt] = rfb_loadData(subj_code,phase_name);
 cnt = proc_selectChannels(cnt,'Acc*');
 dt = 1000/cnt.fs;
 
+mrk_orig = rfb_analyzeTrials(subj_code,phase_name);
+
 trial_mrk = rfb_getTrialMarkers(mrk_orig);
-switch phase_name
-    case 'Phase1'
-        trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==3);
-    case 'Phase2'
-        trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
+if strcmp(phase_name, 'Phase1')
+    trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==3);
+else
+    trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
 end
-mrk = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
-mrk = mrk_selectClasses(mrk,{'trial start','pedal press'});
+mrk_orig = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
+
+mrk_orig = mrk_selectClasses(mrk_orig,'not','movement onset');
+mrk = mrk_selectClasses(mrk_orig,{'trial start','pedal press'});
 
 %% train online detector
 mrk_train = mrk;
@@ -71,8 +72,8 @@ mrk2.className = {'movement onset'};
 mrk = mrk_mergeMarkers(mrk,mrk2);
 mrk = mrk_sortChronologically(mrk);
 t_mo2pp = mrk.time(logical(mrk.y(1,:))) - mrk.time(logical(mrk.y(2,:)));
-ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3)|...
-           (t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3)|...
+ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3.5)|...
+           (t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3.5)|...
            (t_mo2pp<150); % physiologically implausible
 t_onset(ind_excl) = [];
 t_mo2pp(ind_excl) = [];

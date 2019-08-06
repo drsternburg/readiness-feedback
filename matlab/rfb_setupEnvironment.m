@@ -9,6 +9,8 @@ if ispc
     BTB.PrivateDir = 'C:\bbci';
 end
 addpath(fullfile(BTB.PrivateDir,'readiness-feedback','matlab','functions'))
+addpath(fullfile(BTB.PrivateDir,'readiness-feedback','matlab','analysis'))
+addpath(fullfile(BTB.PrivateDir,'readiness-feedback','matlab','acquisition'))
 
 %%
 BTB.Acq.Geometry = [1281 1 1280 998];
@@ -75,34 +77,14 @@ opt.fig.pred_edges = -2500:100:800;
 
 %% feedback parameters
 opt.feedback.name  = 'ReadinessFeedback';
-
 opt.feedback.blocks = {'Practice_Phase1','Phase1','Practice_Phase2','Phase2'};
-
 show_feedback = [0 0 1 1];
-
-end_after_x_bps = [2
-                   100
-                   4
-                   100
-                   ];
-                  
-pause_every_x_bps = [2
-                    25
-                    2
-                    25
-                    ];
-
-for ii = 1:length(opt.feedback.blocks)
-    
+for ii = 1:length(opt.feedback.blocks)    
     opt.feedback.pyff_params(ii).show_feedback = int16(show_feedback(ii));
-    opt.feedback.pyff_params(ii).end_after_x_bps = int16(end_after_x_bps(ii));
-    opt.feedback.pyff_params(ii).pause_every_x_bps = int16(pause_every_x_bps(ii));
-
-    
 end
 
 %%
-clear  ii Wps Ws n show_feedback end_after_x_bps pause_every_x_bps
+clear  ii Wps Ws n show_feedback
 
 
 
