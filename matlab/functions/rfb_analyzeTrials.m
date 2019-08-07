@@ -31,6 +31,7 @@ switch phase_name
             end
             
         end
+        mrk = mrk_selectEvents(mrk,[trial_mrk{:}]);
         
         trial.t_mo2pp_on = nan(Nt,1);
         trial.valid_mo = valid_mo_off;

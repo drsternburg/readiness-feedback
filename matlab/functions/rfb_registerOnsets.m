@@ -8,15 +8,6 @@ cnt = proc_selectChannels(cnt,'Acc*');
 dt = 1000/cnt.fs;
 
 mrk_orig = rfb_analyzeTrials(subj_code,phase_name);
-
-trial_mrk = rfb_getTrialMarkers(mrk_orig);
-if strcmp(phase_name, 'Phase1')
-    trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==3);
-else
-    trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
-end
-mrk_orig = mrk_selectEvents(mrk_orig,[trial_mrk{:}]);
-
 mrk_orig = mrk_selectClasses(mrk_orig,'not','movement onset');
 mrk = mrk_selectClasses(mrk_orig,{'trial start','pedal press'});
 
@@ -62,29 +53,32 @@ for jj = 1:Nt
     end
     
 end
-t_onset(isnan(t_onset)) = [];
+
+%% assign registered movement onsets
+ind_invalid = find(isnan(t_onset));
+mrk_pp = mrk_selectClasses(mrk,'pedal press');
+mrk_pp = mrk_selectEvents(mrk_pp,'not',ind_invalid);
+mrk_mo.time = t_onset;
+mrk_mo.y = ones(1,length(t_onset));
+mrk_mo.className = {'movement onset'};
+mrk_mo = mrk_selectEvents(mrk_mo,'not',ind_invalid);
+mrk = mrk_mergeMarkers(mrk_pp,mrk_mo);
+mrk = mrk_sortChronologically(mrk);
+fprintf('%d Movement onsets assigned to %d trials.\n',Nt-length(ind_invalid),Nt)
 
 %% exclude outliers
-mrk = mrk_selectClasses(mrk,'pedal press');
-mrk2.time = t_onset;
-mrk2.y = ones(1,length(t_onset));
-mrk2.className = {'movement onset'};
-mrk = mrk_mergeMarkers(mrk,mrk2);
-mrk = mrk_sortChronologically(mrk);
 t_mo2pp = mrk.time(logical(mrk.y(1,:))) - mrk.time(logical(mrk.y(2,:)));
-ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3.5)|...
-           (t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3.5)|...
-           (t_mo2pp<150); % physiologically implausible
-t_onset(ind_excl) = [];
+ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3)|...
+           (t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3);
+n_excl = sum(ind_excl);
 t_mo2pp(ind_excl) = [];
-fprintf('%d Movement onsets assigned to %d trials.\n',length(t_onset),Nt)
-fprintf('%d Movement onsets excluded as outliers.\n',sum(ind_excl))
+ind_excl = [find(ind_excl)*2 find(ind_excl)*2-1];
+mrk = mrk_selectEvents(mrk,'not',ind_excl);
+fprintf('%d Movement onsets excluded as outliers.\n',n_excl)
 
 %% insert new markers
-mrk2.time = t_onset;
-mrk2.y = ones(1,length(t_onset));
-mrk2.className = {'movement onset'};
-mrk = mrk_mergeMarkers(mrk_orig,mrk2);
+mrk = mrk_selectClasses(mrk,'movement onset');
+mrk = mrk_mergeMarkers(mrk_orig,mrk);
 mrk = mrk_sortChronologically(mrk);
 
 %% plots
