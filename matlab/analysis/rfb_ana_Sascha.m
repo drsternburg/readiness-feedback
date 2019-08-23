@@ -154,17 +154,17 @@ set(gca,'ygrid','on')
 [~,pval] = ttest2(WT(G==5),WT(G==6)) %% waiting time: *
 
 %%
-fig_init(30,20);
-rsq = proc_rSquareSigned(erp1,'Stats',1);
-H = grid_plot(erp1,mnt);
-grid_addBars(rsq,'HScale',H.scale)
+% fig_init(30,20);
+% rsq = proc_rSquareSigned(erp1,'Stats',1);
+% H = grid_plot(erp1,mnt);
+% grid_addBars(rsq,'HScale',H.scale)
 
 %%
-fig_init(30,20);
-rp_ = proc_selectClasses(rp,[5 6]);
-rsq = proc_rSquareSigned(rp_,'Stats',1);
-H = grid_plot(rp_,mnt);
-grid_addBars(rsq,'HScale',H.scale)
+% fig_init(30,20);
+% rp_ = proc_selectClasses(rp,[5 6]);
+% rsq = proc_rSquareSigned(rp_,'Stats',1);
+% H = grid_plot(rp_,mnt);
+% grid_addBars(rsq,'HScale',H.scale)
 
 
 

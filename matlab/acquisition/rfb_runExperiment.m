@@ -26,5 +26,7 @@ save([fullfile(BTB.Tp.Dir,opt.session_name) '_' BTB.Tp.Code '_opt'],'opt')
 %% Training for Phase 2
 rfb_startRecording('Practice_Phase2',6,3)
 %% Phase 2
-rfb_startRecording('Phase2',100,25)
+rfb_startRecording('Phase21',100,25)
+%% Phase 2
+rfb_startRecording('Phase22',100,25)
 
