@@ -42,22 +42,24 @@ opt.mrk.def = { 2 'pedal press';...
 opt.acc.ival = [-200 0];
 opt.acc.offset = 500;
 
-%% parameters for classification
-%opt.cfy_rp.clab = {'not','E*','Acc*'};
-opt.cfy_rp.clab = {'FC1','FC2','C1','Cz','C2','Fz','F1','F2'};
-%opt.cfy_rp.clab = {'FC2','Cz','C2'};
+%% parameters or amplitude calculation
+opt.amp.ival = [-200 0];
 
-opt.cfy_rp.ival_baseln = [-100 0];
+%% parameters for classification
+opt.cfy_rp.clab_base = {'FC1','FC2','C1','Cz','C2','F1','Fz','F2','CP1','CPz','CP2'};
+opt.cfy_rp.clab = opt.cfy_rp.clab_base;
+
+opt.cfy_rp.ival_baseln = [-1000 -900];
 opt.cfy_rp.ival_fv = [-1000 -900;
-                   -900  -800;
-                   -800  -700;
-                   -700  -600;
-                   -600  -500;
-                   -500  -400;
-                   -400  -300;
-                   -300  -200;
-                   -200  -100;
-                   -100    0];
+                      -900  -800;
+                      -800  -700;
+                      -700  -600;
+                      -600  -500;
+                      -500  -400;
+                      -400  -300;
+                      -300  -200;
+                      -200  -100;
+                      -100    0];
 opt.cfy_rp.fv_window = [opt.cfy_rp.ival_fv(1)-10 0];
 
 opt.cfy_acc.clab = {'Acc*'};
