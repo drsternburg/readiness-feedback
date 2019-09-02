@@ -16,10 +16,10 @@ epo = proc_baseline(epo,opt.cfy_rp.ival_baseln);
 
 epo = proc_rejectArtifactsMaxMin(epo,150,'verbose',1,'Clab',opt.cfy_rp.clab_base);
 
-rsq = proc_aucValues(epo,'Stats',1);
+rsq = proc_rSquareSigned(epo,'Stats',1);
 
 epo_ = proc_selectChannels(epo,opt.cfy_rp.clab_base);
-rsq_ = proc_aucValues(epo_,'Stats',1);
+rsq_ = proc_rSquareSigned(epo_,'Stats',1);
 amp = proc_meanAcrossTime(epo_,opt.amp.ival);
 
 %% (i) sum of r-squared values must be larger than zero, and select all channels above median
@@ -76,7 +76,7 @@ ylabel('# counts')
 
 %% visualization of RPs
 figure
-H = grid_plot(epo,mnt,'PlotStat','sem','ShrinkAxes',[.9 .9]);
+H = grid_plot(epo,mnt,'PlotStat','sem');%,'ShrinkAxes',[.9 .9]);
 grid_addBars(rsq,'HScale',H.scale,'Height',1/7);
 for jj = 1:length(H.chan)
     if any(strcmp(H.chan(jj).ax_title.String,opt.cfy_rp.clab))

@@ -3,13 +3,20 @@ function mrk = rfb_registerOnsets(subj_code,phase_name)
 
 global opt BTB
 
-[~,cnt] = rfb_loadData(subj_code,phase_name);
+[mrk_orig,cnt] = rfb_loadData(subj_code,phase_name);
+mrk_orig = mrk_selectClasses(mrk_orig,'not','movement onset');
+trial = rfb_getTrialMarkers(mrk_orig);
+switch phase_name
+    case 'Phase1'
+        ind = cellfun(@length,trial)==3;
+    otherwise
+        ind = cellfun(@length,trial)==4;
+end
+mrk_orig = mrk_selectEvents(mrk_orig,[trial{ind}]);
+mrk = mrk_selectClasses(mrk_orig,{'trial start','pedal press'});
+
 cnt = proc_selectChannels(cnt,'Acc*');
 dt = 1000/cnt.fs;
-
-mrk_orig = rfb_analyzeTrials(subj_code,phase_name);
-mrk_orig = mrk_selectClasses(mrk_orig,'not','movement onset');
-mrk = mrk_selectClasses(mrk_orig,{'trial start','pedal press'});
 
 %% train online detector
 mrk_train = mrk;
