@@ -1,7 +1,7 @@
 
 
 %% preprocess
-BTB.Tp.Code = 'VPfae';
+BTB.Tp.Code = 'VPfah';
 rfb_convertBVData(BTB.Tp.Code,'Phase2');
 
 
@@ -84,15 +84,15 @@ epo = proc_baseline(epo,200,'beginning');
 % This is in Cz area
 epo_0 = epo.x(:,:,logical(epo.y(1,:)));
 epo_1 = epo.x(:,:,~logical(epo.y(1,:)));
-plot(mean(epo_0(:,8,:),3))
+plot(mean(epo_0(:,12,:),3))
 hold on
-plot(mean(epo_1(:,8,:),3))
+plot(mean(epo_1(:,12,:),3))
 hold off
 % This is on the Fz area 
 figure
-plot(mean(epo_0(:,7,:),3))
+plot(mean(epo_0(:,11,:),3))
 hold on
-plot(mean(epo_1(:,7,:),3))
+plot(mean(epo_1(:,11,:),3))
 hold off
 
 % RP VIz 
@@ -117,34 +117,22 @@ epo_phase1 = proc_segmentation(cnt,mrk,[-1200 0]);
 epo_phase1 = proc_baseline(epo_phase1,200,'beginning');
 epo_phase1_1 = epo_phase1.x(:,:,~logical(epo_phase1.y(1,:)));
 
-% Get the values of all the RP in phase 2
-rp_block_1 = squeeze(epo_1(end, 8, 1:25));
-rp_block_2 = squeeze(epo_1(end, 8, 25:50));
-rp_block_3 = squeeze(epo_1(end, 8, 50:75));
-rp_block_4 = squeeze(epo_1(end, 8, 75:end));
-rp_all_blocks = squeeze(epo_1(end, 8, :));
+% Get the values of all the RP in phase 2 
+%The bad thing about this is that it is only in the Cz area, I need to have
+%it in a more systematically. 
+rp_phase2 = squeeze(epo_1(end, 12, :));
+
 % RP from phase 1
-rp_phase1 = squeeze(epo_phase1_1(end, 8, :));
+rp_phase1 = squeeze(epo_phase1_1(end, 12, :));
 
-h1 = histfit(rp_block_1);
-set(h1(1),'FaceAlpha', 1);
+h1 = histfit(rp_phase2);
+set(h1(1),'FaceAlpha', 0.5);
 hold on
-h2=histfit(rp_block_2);
-set(h2(1),'FaceAlpha', 1); 
 
-h3=histfit(rp_block_3);
-set(h3(1),'FaceAlpha', 1); 
+h2=histfit(rp_phase1);
+set(h2(1),'FaceAlpha', 0.5);
 
-h4=histfit(rp_block_4);
-set(h4(1),'FaceAlpha', 1);
-
-h5=histfit(rp_phase1);
-set(h5(1),'FaceAlpha', 0.3);
-
-h6=histfit(rp_all_blocks);
-set(h6(1),'FaceAlpha', 0.3);
-
-l=legend([h1(1) h2(1) h3(1) h4(1), h5(1), h6(1)],'block 1','block 2','block 3','block 4', 'phase1', 'phase2');
+l=legend([h1(1) h2(1)], 'phase2', 'phase1');
 set(l,'Interpreter','latex','FontSize',14)
 hold off
 
