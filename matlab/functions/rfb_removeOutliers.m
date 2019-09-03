@@ -13,6 +13,7 @@ if isfield(trial,'valid_off')
 else
     v1 = ~trial.valid;
     v2 = v1;
+    %v2 = trial.t_mo2pp<250;
 end
 v3 = isoutlier(trial.cout);
 fprintf('\n  classifier output: %d\n',sum(v3))

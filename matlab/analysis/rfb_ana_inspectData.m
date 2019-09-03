@@ -1,5 +1,5 @@
 
-subj_code = 'VPfaj';
+subj_code = 'VPfar';
 
 %%
 phases = {'Phase1','Phase2'};
@@ -7,6 +7,7 @@ mo_classes = {'movement onset','mo online'};
 var_names = {'Classifier output (a.u.)',...
              'Waiting time (sec)',...
              'Movement duration (ms)'};
+clab_grid = {'F3-4','FC5-6','C5-6','CP5-6','P3-4'};
 
 %% get data and remove outliers
 cnt = cell(2,1);
@@ -18,6 +19,27 @@ for jj = 1:2
     [mrk{jj},trial{jj}] = rfb_removeOutliers(mrk{jj},trial{jj});
 end
 opt2 = rfb_getOptData(subj_code);
+
+%% get acceleration variable
+Acc_avg = cell(2,1);
+Acc_max = cell(2,1);
+for jj = 1:2
+    mrk1 = mrk_selectClasses(mrk{jj},mo_classes{jj});
+    Nt = length(mrk1.time);
+    Acc_avg{jj} = zeros(Nt,1);
+    Acc_max{jj} = zeros(Nt,1);
+    t_mo2pp = trial{jj}.t_mo2pp(trial{jj}.valid);
+    t_mo2pp = floor(t_mo2pp/10)*10;
+    for ii = 1:Nt
+        mrk2 = mrk_selectEvents(mrk1,ii);
+        epo = proc_segmentation(cnt{jj},mrk2,[-100 t_mo2pp(ii)]);
+        epo = proc_selectChannels(epo,'Acc*');
+        epo = proc_baseline(epo,[-100 0]);
+        epo = proc_selectIval(epo,[0 t_mo2pp(ii)]);
+        Acc_avg{jj}(ii) = mean(mean(abs(epo.x)));
+        Acc_max{jj}(ii) = max(max(abs(epo.x)));
+    end
+end
 
 %% compare phases
 X = cell(3,2);
@@ -89,7 +111,10 @@ epo2 = proc_segmentation(cnt{2},mrk_,opt.cfy_rp.fv_window);
 epo2 = proc_baseline(epo2,opt.cfy_rp.ival_baseln);
 epo2.className = {'Phase2'};
 epo = proc_appendEpochs(epo,epo2);
-epo = proc_selectChannels(epo,opt.cfy_rp.clab_base);
+%%%
+epo = proc_rejectArtifactsMaxMin(epo,150,'verbose',1,'Clab',clab_grid);
+%%%
+epo = proc_selectChannels(epo,clab_grid);
 rsq = proc_rSquareSigned(epo);
 
 fig_init(25,20);
@@ -105,10 +130,12 @@ end
 Y = [X{1,2}...
      X{2,2}...
      X{3,2}...
-     trial{2}.time(trial{2}.valid)];
+     trial{2}.time(trial{2}.valid)...
+     Acc_avg{2}...
+     Acc_max{2}];
 T = array2table(Y);
-T.Properties.VariableNames = {'C','WT','Vel','Time'};
-formula = 'C ~ 1 + Time + Vel + WT';
+T.Properties.VariableNames = {'C','WT','Vel','Time','Acc_avg','Acc_max'};
+formula = 'C ~ 1 + Time + WT + Acc_max + Vel + Acc_avg';
 lm = fitlm(T,formula);
 disp(lm)
 

@@ -76,7 +76,8 @@ fprintf('%d Movement onsets assigned to %d trials.\n',Nt-length(ind_invalid),Nt)
 %% exclude outliers
 t_mo2pp = mrk.time(logical(mrk.y(1,:))) - mrk.time(logical(mrk.y(2,:)));
 ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3)|...
-           (t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3);
+           (t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3)|...
+           t_mo2pp<200;
 n_excl = sum(ind_excl);
 t_mo2pp(ind_excl) = [];
 ind_excl = [find(ind_excl)*2 find(ind_excl)*2-1];
