@@ -1,6 +1,9 @@
 
 function [mrk,trial] = rfb_analyzeTrials(subj_code,phase_name)
 
+opt = rfb_getOptData(subj_code);
+trial.clab = opt.cfy_rp.clab;
+
 switch phase_name
     
     %%
@@ -32,12 +35,10 @@ switch phase_name
             end
             
         end
-        mrk = mrk_selectEvents(mrk,[trial_mrk{:}]);
         
         trial.valid = logical(valid);
-        trial.block_nr = ones(Nt,1);
-        opt2 = rfb_getOptData(subj_code);
-        trial.cout(trial.valid,1) = opt2.feedback.pyff_params(4).phase1_cout';
+        trial.cout = nan(length(trial.valid),1);
+        trial.cout(trial.valid) = opt.feedback.pyff_params(4).phase1_cout';
         
     otherwise
         %%
@@ -47,61 +48,42 @@ switch phase_name
         trial_mrk = rfb_getTrialMarkers(mrk);
         Nt = length(trial_mrk);
         
-        ind_rem = [];
-        trial.valid_off = [];
         trial.t_ts2mo_off = [];
         trial.t_mo2pp_off = [];
-        trial.valid = [];
+        valid = [];
         trial.t_ts2mo = [];
         trial.t_mo2pp = [];
-        ii = 1;
-        while ii<=Nt
+        for ii = 1:Nt
             
             mrk_this = mrk_selectEvents(mrk,trial_mrk{ii});
             
-            if ~any(strcmp(mrk_this.className,'feedback'))
-                ind_rem = cat(1,ind_rem,ii);
-                ii = ii+1;
-                continue
+            if any(strcmp(mrk_this.className,'mo online'))
+                valid = cat(1,valid,true);
+                mrk_ = mrk_selectClasses(mrk_this,{'trial start','mo online'});
+                t_ts2mo = mrk_.time(logical(mrk_.y(2,:)))-mrk_.time(logical(mrk_.y(1,:)));
+                trial.t_ts2mo = cat(1,trial.t_ts2mo,t_ts2mo);
+                trial.t_mo2pp = cat(1,trial.t_mo2pp,L.t_mo2pp(ii));
+            else
+                valid = cat(1,valid,false);
             end
             
             if any(strcmp(mrk_this.className,'movement onset'))
-                trial.valid_off = cat(1,trial.valid_off,true);
                 mrk_ = mrk_selectClasses(mrk_this,{'trial start','movement onset'});
                 t_ts2mo_off = mrk_.time(logical(mrk_.y(2,:)))-mrk_.time(logical(mrk_.y(1,:)));
                 trial.t_ts2mo_off = cat(1,trial.t_ts2mo_off,t_ts2mo_off);
                 mrk_ = mrk_selectClasses(mrk_this,{'movement onset','pedal press'});
                 t_mo2pp_off = mrk_.time(logical(mrk_.y(2,:)))-mrk_.time(logical(mrk_.y(1,:)));
                 trial.t_mo2pp_off = cat(1,trial.t_mo2pp_off,t_mo2pp_off);
-            else
-                trial.valid_off = cat(1,trial.valid_off,false);
-                trial.t_ts2mo_off = cat(1,trial.t_ts2mo_off,NaN);
-                trial.t_mo2pp_off = cat(1,trial.t_mo2pp_off,NaN);
             end
             
-             if any(strcmp(mrk_this.className,'mo online'))
-                trial.valid = cat(1,trial.valid,true);
-                mrk_ = mrk_selectClasses(mrk_this,{'trial start','mo online'});
-                t_ts2mo = mrk_.time(logical(mrk_.y(2,:)))-mrk_.time(logical(mrk_.y(1,:)));
-                trial.t_ts2mo = cat(1,trial.t_ts2mo,t_ts2mo);
-                trial.t_mo2pp = cat(1,trial.t_mo2pp,L.t_mo2pp(ii));
-            else
-                trial.valid = cat(1,trial.valid,false);
-                trial.t_ts2mo = cat(1,trial.t_ts2mo,NaN);
-                trial.t_mo2pp = cat(1,trial.t_mo2pp,NaN);
-            end
-            
-            ii = ii+1;
         end
-        
-        trial.valid_off = logical(trial.valid_off);
-        trial.valid = logical(trial.valid);
-        mrk = mrk_selectEvents(mrk,[trial_mrk{setdiff(1:Nt,ind_rem)}]);
                 
-        trial.block_nr = L.block_nr;
-        trial.feedback = L.feedback;
-        trial.cout = L.cout;
-        trial.time = L.time;
+        valid = logical(valid);
+        trial.block_nr = L.block_nr(valid);
+        trial.feedback = L.feedback(valid);
+        trial.cout = L.cout(valid);
+        trial.time = L.time(valid);
+        trial.valid = true(sum(valid),1);
         
 end
 

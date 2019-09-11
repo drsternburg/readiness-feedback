@@ -16,29 +16,8 @@ trial = cell(2,1);
 for jj = 1:2
     [mrk{jj},trial{jj}] = rfb_analyzeTrials(subj_code,phases{jj});
     [~,cnt{jj},mnt] = rfb_loadData(subj_code,phases{jj});
-    [mrk{jj},trial{jj}] = rfb_removeOutliers(mrk{jj},trial{jj});
-end
-opt2 = rfb_getOptData(subj_code);
-
-%% get acceleration variable
-Acc_avg = cell(2,1);
-Acc_max = cell(2,1);
-for jj = 1:2
-    mrk1 = mrk_selectClasses(mrk{jj},mo_classes{jj});
-    Nt = length(mrk1.time);
-    Acc_avg{jj} = zeros(Nt,1);
-    Acc_max{jj} = zeros(Nt,1);
-    t_mo2pp = trial{jj}.t_mo2pp(trial{jj}.valid);
-    t_mo2pp = floor(t_mo2pp/10)*10;
-    for ii = 1:Nt
-        mrk2 = mrk_selectEvents(mrk1,ii);
-        epo = proc_segmentation(cnt{jj},mrk2,[-100 t_mo2pp(ii)]);
-        epo = proc_selectChannels(epo,'Acc*');
-        epo = proc_baseline(epo,[-100 0]);
-        epo = proc_selectIval(epo,[0 t_mo2pp(ii)]);
-        Acc_avg{jj}(ii) = mean(mean(abs(epo.x)));
-        Acc_max{jj}(ii) = max(max(abs(epo.x)));
-    end
+    trial{jj} = rfb_removeOutliers(trial{jj});
+    trial{jj} = rfb_removeArtifacts(trial{jj},mrk{jj},cnt{jj},mo_classes{jj});
 end
 
 %% compare phases
@@ -91,11 +70,12 @@ for jj = 1:3
 end
 
 %% classification accuracy phase 1
-mrk_ = mrk_selectClasses(mrk{1},{'trial start','movement onset'});
+mrk_ = rfb_selectTrials(mrk{1},trial{1}.valid);
+mrk_ = mrk_selectClasses(mrk_,{'trial start','movement onset'});
 fv = proc_segmentation(cnt{1},mrk_,opt.cfy_rp.fv_window);
 fv = proc_baseline(fv,opt.cfy_rp.ival_baseln);
 fv = proc_jumpingMeans(fv,opt.cfy_rp.ival_fv);
-fv = proc_selectChannels(fv,opt.cfy_rp.clab_base); %%% WHY IS IT CLAB_BASE?
+fv = proc_selectChannels(fv,trial{1}.clab);
 warning off
 loss = crossvalidation(fv,@train_RLDAshrink,'SampleFcn',@sample_leaveOneOut);
 warning on
@@ -106,7 +86,7 @@ mrk_ = mrk_selectClasses(mrk{2},{'trial start','movement onset'});
 fv = proc_segmentation(cnt{2},mrk_,opt.cfy_rp.fv_window);
 fv = proc_baseline(fv,opt.cfy_rp.ival_baseln);
 fv = proc_jumpingMeans(fv,opt.cfy_rp.ival_fv);
-fv = proc_selectChannels(fv,opt.cfy_rp.clab_base); %%% WHY IS IT CLAB_BASE?
+fv = proc_selectChannels(fv,trial{1}.clab);
 warning off
 loss = crossvalidation(fv,@train_RLDAshrink,'SampleFcn',@sample_leaveOneOut);
 warning on
@@ -114,15 +94,15 @@ fprintf('\nClassification accuracy phase 2: %2.1f%%\n',100*(1-loss))
 
 
 %% grid plot of RP difference between phases 1 and 2
-mrk_ = mrk_selectClasses(mrk{1},mo_classes{1});
-epo = proc_segmentation(cnt{1},mrk_,opt.cfy_rp.fv_window);
-epo = proc_baseline(epo,opt.cfy_rp.ival_baseln);
-epo.className = {'Phase1'};
-mrk_ = mrk_selectClasses(mrk{2},mo_classes{2});
-epo2 = proc_segmentation(cnt{2},mrk_,opt.cfy_rp.fv_window);
-epo2 = proc_baseline(epo2,opt.cfy_rp.ival_baseln);
-epo2.className = {'Phase2'};
-epo = proc_appendEpochs(epo,epo2);
+epo = cell(2,1);
+for jj = 1:2
+    mrk_ = rfb_selectTrials(mrk{jj},trial{jj}.valid);
+    mrk_ = mrk_selectClasses(mrk_,mo_classes{jj});
+    epo{jj} = proc_segmentation(cnt{jj},mrk_,opt.cfy_rp.fv_window);
+    epo{jj} = proc_baseline(epo{jj},opt.cfy_rp.ival_baseln);
+    epo{jj}.className = phases(jj);
+end
+epo = proc_appendEpochs(epo{1},epo{2});
 %%%
 epo = proc_rejectArtifactsMaxMin(epo,150,'verbose',1,'Clab',clab_grid);
 %%%
@@ -133,23 +113,10 @@ fig_init(25,20);
 H = grid_plot(epo,mnt,'PlotStat','sem','ShrinkAxes',[1 1.8]);
 grid_addBars(rsq,'HScale',H.scale,'Height',1/7);
 for jj = 1:length(H.chan)
-    if any(strcmp(H.chan(jj).ax_title.String,opt2.cfy_rp.clab))
+    if any(strcmp(H.chan(jj).ax_title.String,trial{2}.clab))
         set(H.chan(jj).ax_title,'FontWeight','bold')
     end
 end
-
-%%
-Y = [X{1,2}...
-     X{2,2}...
-     X{3,2}...
-     trial{2}.time(trial{2}.valid)...
-     Acc_avg{2}...
-     Acc_max{2}];
-T = array2table(Y);
-T.Properties.VariableNames = {'C','WT','Vel','Time','Acc_avg','Acc_max'};
-formula = 'C ~ 1 + Time + WT + Acc_max + Vel + Acc_avg';
-lm = fitlm(T,formula);
-disp(lm)
 
 
 
