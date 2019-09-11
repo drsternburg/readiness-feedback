@@ -1,5 +1,5 @@
 
-subj_code = 'VPfar';
+subj_code = 'VPfau';
 
 %%
 phases = {'Phase1','Phase2'};
@@ -95,11 +95,23 @@ mrk_ = mrk_selectClasses(mrk{1},{'trial start','movement onset'});
 fv = proc_segmentation(cnt{1},mrk_,opt.cfy_rp.fv_window);
 fv = proc_baseline(fv,opt.cfy_rp.ival_baseln);
 fv = proc_jumpingMeans(fv,opt.cfy_rp.ival_fv);
-fv = proc_selectChannels(fv,opt.cfy_rp.clab_base);
+fv = proc_selectChannels(fv,opt.cfy_rp.clab_base); %%% WHY IS IT CLAB_BASE?
 warning off
 loss = crossvalidation(fv,@train_RLDAshrink,'SampleFcn',@sample_leaveOneOut);
 warning on
-fprintf('\nClassification accuracy: %2.1f%%\n',100*(1-loss))
+fprintf('\nClassification accuracy phase 1: %2.1f%%\n',100*(1-loss))
+
+%% classification accuracy phase 2
+mrk_ = mrk_selectClasses(mrk{2},{'trial start','movement onset'});
+fv = proc_segmentation(cnt{2},mrk_,opt.cfy_rp.fv_window);
+fv = proc_baseline(fv,opt.cfy_rp.ival_baseln);
+fv = proc_jumpingMeans(fv,opt.cfy_rp.ival_fv);
+fv = proc_selectChannels(fv,opt.cfy_rp.clab_base); %%% WHY IS IT CLAB_BASE?
+warning off
+loss = crossvalidation(fv,@train_RLDAshrink,'SampleFcn',@sample_leaveOneOut);
+warning on
+fprintf('\nClassification accuracy phase 2: %2.1f%%\n',100*(1-loss))
+
 
 %% grid plot of RP difference between phases 1 and 2
 mrk_ = mrk_selectClasses(mrk{1},mo_classes{1});
