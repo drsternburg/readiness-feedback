@@ -18,6 +18,7 @@ epo = proc_rejectArtifactsMaxMin(epo,150,'verbose',1,'Clab',opt.cfy_rp.clab_base
 
 rsq = proc_rSquareSigned(epo,'Stats',1);
 
+%epo_ = proc_selectChannels(epo,opt.cfy_rp.clab_base);
 epo_ = proc_selectChannels(epo,opt.cfy_rp.clab_base);
 rsq_ = proc_rSquareSigned(epo_,'Stats',1);
 amp = proc_meanAcrossTime(epo_,opt.amp.ival);

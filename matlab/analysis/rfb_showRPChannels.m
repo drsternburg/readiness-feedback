@@ -1,7 +1,7 @@
 
 subj_code = {'VPfah','VPfai','VPfaj','VPfak','VPfal','VPfam','VPfan',...
              'VPfao','VPfap','VPfaq','VPfar','VPfas','VPfat','VPfau',...
-             'VPfav','VPfaw'};
+             'VPfav','VPfaw','VPfax','VPfay','VPfaz','VPfba'};
 
 subj_code(strcmp(subj_code,'VPfam')) = []; % exclude VPfam due to very noisy data
 subj_code(strcmp(subj_code,'VPfal')) = []; % exclude VPfal due to very short WTs
@@ -27,5 +27,5 @@ end
 fig_init(20,15);
 mnt = mnt_adaptMontage(mnt,cnt);
 H = plot_scalp(mnt,W,defopt_scalp_r('ExtrapolateToZero',1,'ShowLabels',1,...
-    'CLim',[-13 13]));
-set(H.cb,'Limits',[0 13],'Ticks',1:2:13)
+    'CLim',[-Ns Ns]));
+set(H.cb,'Limits',[0 Ns],'Ticks',1:2:Ns)

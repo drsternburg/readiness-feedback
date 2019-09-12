@@ -9,7 +9,7 @@ N = length(x);
 ind = zeros(N,1);
 
 for ii = 1:nrep
-    mn = nanmedian(x);
+    mn = nanmean(x);
     sd = nanstd(x);
     ind = ind | (x<mn-sd*3|x>mn+sd*3);
     x(ind) = NaN;

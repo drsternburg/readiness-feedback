@@ -65,6 +65,8 @@ switch phase_name
                 trial.t_mo2pp = cat(1,trial.t_mo2pp,L.t_mo2pp(ii));
             else
                 valid = cat(1,valid,false);
+                trial.t_ts2mo = cat(1,trial.t_ts2mo,NaN);
+                trial.t_mo2pp = cat(1,trial.t_mo2pp,NaN);
             end
             
             if any(strcmp(mrk_this.className,'movement onset'))
@@ -78,12 +80,12 @@ switch phase_name
             
         end
                 
-        valid = logical(valid);
-        trial.block_nr = L.block_nr(valid);
-        trial.feedback = L.feedback(valid);
-        trial.cout = L.cout(valid);
-        trial.time = L.time(valid);
-        trial.valid = true(sum(valid),1);
+        trial.valid = logical(valid);
+        trial.block_nr = L.block_nr;
+        trial.feedback = L.feedback;
+        trial.cout = L.cout;
+        trial.time = L.time;
+        trial.trial_nr = L.trial_nr;
         
 end
 
