@@ -1,5 +1,5 @@
 
-subj_code = 'VPfbb';
+subj_code = 'VPfbl';
 
 %%
 phases = {'Phase1','Phase2'};
@@ -10,7 +10,7 @@ var_names = {'Classifier output (a.u.)',...
 clab_grid = {'F3-4','FC5-6','C5-6','CP5-6','P3-4'};
 
 %% get data and remove outliers
-[trial,mrk,cnt,mnt] = rfb_getData(subj_code,1,0);
+[trial,mrk,cnt,mnt] = rfb_getData(subj_code,1,1);
 
 %% compare phases
 X = cell(3,2);

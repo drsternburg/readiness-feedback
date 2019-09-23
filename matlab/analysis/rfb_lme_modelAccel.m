@@ -1,12 +1,11 @@
 
-VariableNames = {'C','WT','Dur','Accel','Trial','Subj'};
+VariableNames = {'Feedback','WT','Duration','Trial','Subj'};
 
 %%
-Y2 = Y(:,[2 4 5 6]);
-T = array2table(Y2);
-T.Properties.VariableNames = {'WT','Accel','Trial','Subj'};
-formula = mixedModelSelection(T,'Accel');
-%formula = 'Accel ~ 1 + Trial*WT + (1 + Trial + WT | Subj)';
+T = array2table(Y(:,2:5));
+T.Properties.VariableNames = VariableNames(2:5);
+%formula = mixedModelSelection(T,'Duration');
+formula = 'Trial ~ 1 + Duration*WT + (1 + WT + Duration | Subj)';
 lme = fitlme(T,formula,'FitMethod','REML');
 disp(lme)
 
@@ -28,6 +27,14 @@ P_mn = squeeze(mean(P));
 P_se = squeeze(std(P))/sqrt(Ns);
 
 
+%%
+Y2 = Y(:,3:5);
+T = array2table(standardizePredictors(Y2,1));
+T.Properties.VariableNames = {'Duration','Trial','Subj'};
+%formula = mixedModelSelection(T,'Duration');
+formula = 'Duration ~ 1 + Trial + (1 + Trial | Subj)';
+lme = fitlme(T,formula,'FitMethod','REML');
+disp(lme)
 
 
 

@@ -1,16 +1,19 @@
 
-subj_code = {'VPfah','VPfai','VPfaj','VPfak','VPfal','VPfam','VPfan',...
-             'VPfao','VPfap','VPfaq','VPfar','VPfas','VPfat','VPfau',...
-             'VPfav','VPfaw','VPfax','VPfay','VPfaz','VPfba'};
+% subj_code = {'VPfah','VPfai','VPfaj','VPfak','VPfal','VPfam','VPfan',...
+%              'VPfao','VPfap','VPfaq','VPfar','VPfas','VPfat','VPfau',...
+%              'VPfav','VPfaw','VPfax','VPfay','VPfaz','VPfba'};
+% subj_code(strcmp(subj_code,'VPfam')) = []; % exclude VPfam due to very noisy data
+% subj_code(strcmp(subj_code,'VPfal')) = []; % exclude VPfal due to very short WTs
 
-subj_code(strcmp(subj_code,'VPfam')) = []; % exclude VPfam due to very noisy data
-subj_code(strcmp(subj_code,'VPfal')) = []; % exclude VPfal due to very short WTs
+%%
+subj_code = {'VPfbe','VPfbf'};
 
+%%
 Ns = length(subj_code);
 phase = 'Phase2';
 clab_grid = {'F3-4','FC5-6','C5-6','CP5-6','P3-4'};
 
-[~,cnt,mnt] = rfb_loadData(subj_code{7},phase);
+[~,cnt,mnt] = rfb_loadData(subj_code{1},phase);
 cnt = proc_selectChannels(cnt,util_scalpChannels);
 clab = cnt.clab;
 W = zeros(length(clab),1);

@@ -21,13 +21,19 @@ switch phase_name
             mrk_this = mrk_selectEvents(mrk,trial_mrk{ii});
             
             if any(strcmp(mrk_this.className,'movement onset'))
-                valid = cat(1,valid,true);
                 mrk_ = mrk_selectClasses(mrk_this,{'trial start','movement onset'});
                 t_ts2mo = mrk_.time(logical(mrk_.y(2,:)))-mrk_.time(logical(mrk_.y(1,:)));
-                trial.t_ts2mo = cat(1,trial.t_ts2mo,t_ts2mo);
-                mrk_ = mrk_selectClasses(mrk_this,{'movement onset','pedal press'});
-                t_mo2pp = mrk_.time(logical(mrk_.y(2,:)))-mrk_.time(logical(mrk_.y(1,:)));
-                trial.t_mo2pp = cat(1,trial.t_mo2pp,t_mo2pp);
+                if t_ts2mo<-opt.cfy_rp.fv_window(1)
+                    valid = cat(1,valid,false);
+                    trial.t_ts2mo = cat(1,trial.t_ts2mo,NaN);
+                    trial.t_mo2pp = cat(1,trial.t_mo2pp,NaN);
+                else
+                    valid = cat(1,valid,true);
+                    trial.t_ts2mo = cat(1,trial.t_ts2mo,t_ts2mo);
+                    mrk_ = mrk_selectClasses(mrk_this,{'movement onset','pedal press'});
+                    t_mo2pp = mrk_.time(logical(mrk_.y(2,:)))-mrk_.time(logical(mrk_.y(1,:)));
+                    trial.t_mo2pp = cat(1,trial.t_mo2pp,t_mo2pp);
+                end
             else
                 valid = cat(1,valid,false);
                 trial.t_ts2mo = cat(1,trial.t_ts2mo,NaN);

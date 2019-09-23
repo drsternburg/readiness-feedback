@@ -10,7 +10,7 @@ if isfield(trial,'t_ts2mo_off') % Phase 2
 else % Phase 1
     v1 = ~trial.valid;
     %v2 = v1;
-    v2 = trial.t_mo2pp<250;
+    v2 = trial.t_mo2pp<150;
 end
 
 v3 = isoutlier(trial.t_ts2mo);

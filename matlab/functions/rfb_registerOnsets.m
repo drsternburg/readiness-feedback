@@ -1,7 +1,11 @@
 
-function mrk = rfb_registerOnsets(subj_code,phase_name)
+function mrk = rfb_registerOnsets(subj_code,phase_name,excl_outl)
 
 global opt BTB
+
+if nargin==2
+    excl_outl = 1;
+end
 
 [mrk_orig,cnt] = rfb_loadData(subj_code,phase_name);
 mrk_orig = mrk_selectClasses(mrk_orig,'not','movement onset');
@@ -75,14 +79,16 @@ fprintf('%d Movement onsets assigned to %d trials.\n',Nt-length(ind_invalid),Nt)
 
 %% exclude outliers
 t_mo2pp = mrk.time(logical(mrk.y(1,:))) - mrk.time(logical(mrk.y(2,:)));
-ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3)|...
-           (t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3)|...
-           t_mo2pp<200;
-n_excl = sum(ind_excl);
-t_mo2pp(ind_excl) = [];
-ind_excl = [find(ind_excl)*2 find(ind_excl)*2-1];
-mrk = mrk_selectEvents(mrk,'not',ind_excl);
-fprintf('%d Movement onsets excluded as outliers.\n',n_excl)
+if excl_outl
+    ind_excl = (t_mo2pp>mean(t_mo2pp)+std(t_mo2pp)*3)|...
+        (t_mo2pp<mean(t_mo2pp)-std(t_mo2pp)*3)|...
+        t_mo2pp<200;
+    n_excl = sum(ind_excl);
+    t_mo2pp(ind_excl) = [];
+    ind_excl = [find(ind_excl)*2 find(ind_excl)*2-1];
+    mrk = mrk_selectEvents(mrk,'not',ind_excl);
+    fprintf('%d Movement onsets excluded as outliers.\n',n_excl)
+end
 
 %% insert new markers
 mrk = mrk_selectClasses(mrk,'movement onset');

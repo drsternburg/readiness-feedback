@@ -5,20 +5,35 @@ global opt
 
 %% prepare data
 [mrk,cnt,mnt] = rfb_loadData(subj_code,'Phase1');
+cnt = proc_selectChannels(cnt,'not','Acc*');
+%%%
+%[dat,pca_opt] = proc_pca(cnt);
+%cnt = proc_regressOutComponents(cnt,dat.x(:,1));
+%%%
 trial_mrk = rfb_getTrialMarkers(mrk);
 trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
 mrk = mrk_selectEvents(mrk,[trial_mrk{:}]);
 mrk = mrk_selectClasses(mrk,{'trial start','movement onset'});
 
+%% exclude too short waiting times
+mrk_mo = mrk_selectClasses(mrk,'movement onset');
+mrk_ts = mrk_selectClasses(mrk,'trial start');
+t_ts2mo = mrk_mo.time - mrk_ts.time;
+ind_valid = t_ts2mo>=-opt.cfy_rp.fv_window(1);
+mrk = mrk_mergeMarkers(mrk_selectEvents(mrk_ts,ind_valid),mrk_selectEvents(mrk_mo,ind_valid));
+%%%
+mrk = mrk_sortChronologically(mrk);
+mrk = mrk_selectEvents(mrk,30:length(mrk.time));
+%%%
+
 %%
 epo = proc_segmentation(cnt,mrk,opt.cfy_rp.fv_window);
 epo = proc_baseline(epo,opt.cfy_rp.ival_baseln);
 
-epo = proc_rejectArtifactsMaxMin(epo,150,'verbose',1,'Clab',opt.cfy_rp.clab_base);
+epo = proc_rejectArtifactsMaxMin(epo,100,'verbose',1,'Clab',opt.cfy_rp.clab_base);
 
 rsq = proc_rSquareSigned(epo,'Stats',1);
 
-%epo_ = proc_selectChannels(epo,opt.cfy_rp.clab_base);
 epo_ = proc_selectChannels(epo,opt.cfy_rp.clab_base);
 rsq_ = proc_rSquareSigned(epo_,'Stats',1);
 amp = proc_meanAcrossTime(epo_,opt.amp.ival);
@@ -37,8 +52,8 @@ chanind_2 = pval<.01;
 chanind_3 = pval<.01;
 
 %% channel selection
-%chan_sel = epo_.clab(chanind_2&chanind_3);
-opt.cfy_rp.clab = epo_.clab(chanind_1&chanind_2&chanind_3);
+opt.cfy_rp.clab = epo_.clab(chanind_2&chanind_3);
+%opt.cfy_rp.clab = epo_.clab(chanind_1&chanind_2&chanind_3);
 
 %% cross-validation
 cnt_xv = proc_selectChannels(cnt,opt.cfy_rp.clab);

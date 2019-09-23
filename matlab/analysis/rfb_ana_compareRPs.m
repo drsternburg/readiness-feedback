@@ -1,7 +1,7 @@
 
 subj_code = {'VPfah','VPfai','VPfaj','VPfak','VPfal','VPfam','VPfan',...
              'VPfao','VPfap','VPfaq','VPfar','VPfas','VPfat','VPfau',...
-             'VPfav','VPfaw'};
+             'VPfav','VPfaw','VPfax','VPfay','VPfaz','VPfba','VPfbb','VPfbc'};
 subj_code(strcmp(subj_code,'VPfam')) = []; % exclude VPfam due to very noisy data
 subj_code(strcmp(subj_code,'VPfal')) = []; % exclude VPfal due to very short WTs
 subj_code(strcmp(subj_code,'VPfar')) = []; % CHECK!!!
