@@ -1,12 +1,13 @@
 
-VariableNames = {'Feedback','WT','Duration','Trial','Subj'};
+VariableNames = {'Feedback','WT','Duration','VelMean','VelMax','Trial','Block','Subj'};
 
 %% Model selection
 %T = array2table(Y);
-T = array2table(standardizePredictors(Y,[2 3]));
+T = array2table(standardizePredictors(Y,[2 3 4 5]));
+T.Properties.VariableNames = VariableNames;
 
 %% Model selection
-T.Properties.VariableNames = VariableNames;
+T = T(:,[1 2 3 6 8]);
 formula = mixedModelSelection(T,'Feedback');
 
 %%
@@ -18,8 +19,8 @@ disp(lme)
 %%
 T2 = table();
 Np = 100;
-Nt = 300;
-Trial = 1:300;
+Nt = 12;
+Block = 1:Nt;
 Duration = linspace(prctile(T.Duration,1),prctile(T.Duration,99),Np);
 
 P = zeros(Ns,Np,Nt);
@@ -28,7 +29,7 @@ for ii = 1:Ns
     T2.WT = ones(Nt,1)*median(T.WT(T.Subj==ii));
     for jj = 1:Np
         T2.Duration = ones(Nt,1)*Duration(jj);
-        T2.Trial = Trial';
+        T2.Block = Block';
         P(ii,jj,:) = predict(lme,T2,'Conditional',1);
     end
 end
@@ -37,7 +38,7 @@ P_se = squeeze(std(P))/sqrt(Ns);
 
 %%
 figure
-surf(Trial,Duration,P_mn)
+surf(Block,Duration,P_mn)
 
 
 

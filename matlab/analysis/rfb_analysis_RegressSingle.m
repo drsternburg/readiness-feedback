@@ -1,5 +1,5 @@
 
-subj_code = 'VPfbl';
+subj_code = 'VPfbm';
 [trial,mrk,cnt,mnt] = rfb_getData(subj_code,1,1);
 
 %%

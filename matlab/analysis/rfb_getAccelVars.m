@@ -1,17 +1,23 @@
 
-function [Acc_avg,Acc_max] = rfb_getAccelVars(mrk,trial,cnt,mo_class)
+function trial = rfb_getAccelVars(mrk,trial,cnt,mo_class)
 
+mrk = rfb_selectTrials(mrk,trial.valid);
 mrk = mrk_selectClasses(mrk,mo_class);
-Nt = length(mrk.time);
-Acc_avg = zeros(Nt,1);
-Acc_max = zeros(Nt,1);
-t_mo2pp = floor(trial.t_mo2pp/10)*10;
+Nt = length(trial.valid);
+trial.acc_avg = nan(Nt,1);
+trial.acc_max = nan(Nt,1);
+t_mo2pp = floor(trial.t_mo2pp(trial.valid)/10)*10;
+ind = 1;
 for ii = 1:Nt
-    mrk2 = mrk_selectEvents(mrk,ii);
-    epo = proc_segmentation(cnt,mrk2,[-100 t_mo2pp(ii)]);
+    if not(trial.valid(ii))
+        continue
+    end
+    mrk2 = mrk_selectEvents(mrk,ind);
+    epo = proc_segmentation(cnt,mrk2,[-100 t_mo2pp(ind)]);
     epo = proc_selectChannels(epo,'Acc*');
     epo = proc_baseline(epo,[-100 0]);
-    epo = proc_selectIval(epo,[0 t_mo2pp(ii)]);
-    Acc_avg(ii) = mean(mean(abs(epo.x)));
-    Acc_max(ii) = max(max(abs(epo.x)));
+    epo = proc_selectIval(epo,[0 t_mo2pp(ind)]);
+    trial.acc_avg(ii) = mean(mean(abs(epo.x)));
+    trial.acc_max(ii) = max(max(abs(epo.x)));
+    ind = ind+1;
 end

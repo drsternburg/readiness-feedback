@@ -1,5 +1,5 @@
 
-subj_code = 'VPfbj';
+subj_code = 'VPfbm';
 
 [trial,mrk,cnt,mnt] = rfb_getData(subj_code,1,0);
 
@@ -39,16 +39,16 @@ for jj = 1:Nc
 end
 
 %%
-epo_ = proc_selectClasses(epo,'TS Phase1');
-%epo_ = proc_selectClasses(epo,'MO Phase2');
-Nh = floor(size(epo_.x,3)/5);
-epo_h1 = proc_selectEpochs(epo_,1:Nh);
-epo_h1.className = {'MO Phase2 first half'};
-epo_h2 = proc_selectEpochs(epo_,Nh+1:size(epo_.x,3));
-epo_h2.className = {'MO Phase2 second half'};
-epo_ = proc_appendEpochs(epo_h1,epo_h2);
-rsq = proc_rSquareSigned(epo_);
-rfb_gridplot(epo_,rsq,mnt,clab_selected)
+% epo_ = proc_selectClasses(epo,'TS Phase1');
+% %epo_ = proc_selectClasses(epo,'MO Phase2');
+% Nh = floor(size(epo_.x,3)/2);
+% epo_h1 = proc_selectEpochs(epo_,1:Nh);
+% epo_h1.className = {'MO Phase2 first half'};
+% epo_h2 = proc_selectEpochs(epo_,Nh+1:size(epo_.x,3));
+% epo_h2.className = {'MO Phase2 second half'};
+% epo_ = proc_appendEpochs(epo_h1,epo_h2);
+% rsq = proc_rSquareSigned(epo_);
+% rfb_gridplot(epo_,rsq,mnt,clab_selected)
 
 %%
 % epo_ = proc_selectClasses(epo,'MO Phase2');

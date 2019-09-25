@@ -20,6 +20,7 @@ for jj = 1:2
     fprintf('Loading and preprocessing dataset %s/%s...\n',subj_code,phases{jj})
     [mrk{jj},trial{jj}] = rfb_analyzeTrials(subj_code,phases{jj});
     [~,cnt{jj},mnt] = rfb_loadData(subj_code,phases{jj});
+    trial{jj} = rfb_getAccelVars(mrk{jj},trial{jj},cnt{jj},mo_classes{jj});
     if flag_outliers
         trial{jj} = rfb_flagOutliers(trial{jj});
         trial{jj} = rfb_flagArtifacts(trial{jj},mrk{jj},cnt{jj},mo_classes{jj});
