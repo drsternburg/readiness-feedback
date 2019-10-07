@@ -11,7 +11,7 @@ bbci.source.acquire_param = {struct('fs',opt.acq.fs,'filt_b',opt.acq.filt.b,'fil
 
 % EEG
 bbci.signal(1).source = 1;
-bbci.signal(1).clab = opt.cfy_rp.clab;
+bbci.signal(1).proc = {{@online_linearDerivation, opt.acq.A}};
 
 % Acc
 bbci.signal(2).source = 1;
