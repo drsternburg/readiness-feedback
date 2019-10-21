@@ -1,5 +1,5 @@
 
-variable = 'cout';
+variable = 't_ts2mo';
 
 %%
 

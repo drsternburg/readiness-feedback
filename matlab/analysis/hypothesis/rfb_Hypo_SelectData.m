@@ -5,8 +5,8 @@ flag.cout_outlier = 1;
 flag.premature = 1;
 flag.eeg_artifact = 1;
 
-opt.cfy_rp.fv_window = [-1510 0];
-opt.cfy_rp.ival_baseln = [-1500 -1400];
+%opt.cfy_rp.fv_window = [-1510 0];
+%opt.cfy_rp.ival_baseln = [-1500 -1400];
 
 epo = cell(Ns,1);
 trial = cell(Ns,1);

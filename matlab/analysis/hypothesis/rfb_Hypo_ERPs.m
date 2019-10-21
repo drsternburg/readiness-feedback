@@ -3,7 +3,8 @@ clab_grid = {'F3-4','FC5-6','C5-6','CP5-6','P3-4'};
 mnts = mnt_adaptMontage(mnt,clab_grid);
 alph = .001;
 
-topo_ivals = [-900 -600; -600 -300; -300 0];
+%topo_ivals = [-900 -600; -600 -300; -300 0];
+topo_ivals = [-1500 -1000; -1000 -500; -500 0];
 
 %% Compare RPs against flat
 ci = [2 4];
