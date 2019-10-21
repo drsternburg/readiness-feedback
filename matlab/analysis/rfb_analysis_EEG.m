@@ -1,5 +1,5 @@
 
-subj_code = 'VPfbm';
+subj_code = 'VPfbn';
 
 [trial,mrk,cnt,mnt] = rfb_getData(subj_code,1,0);
 
@@ -37,6 +37,11 @@ for jj = 1:Nc
     rsq = proc_rSquareSigned(epo_);
     rfb_gridplot(epo_,rsq,mnt,clab_selected)
 end
+
+%%
+epo_ = proc_selectClasses(epo,{'MO Phase2.1','MO Phase2.3'});
+rsq = proc_rSquareSigned(epo_);
+rfb_gridplot(epo_,rsq,mnt,clab_selected)
 
 %%
 % epo_ = proc_selectClasses(epo,'TS Phase1');

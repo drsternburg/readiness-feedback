@@ -1,33 +1,59 @@
 
-function [trial,mrk,cnt,mnt] = rfb_getData(subj_code,flag_outliers,flag_premature)
+function [trial,mrk,cnt,mnt] = rfb_getData(subj_code,flag)
 
 global opt
 
-if not(exist('flag_outliers','var'))
-    flag_outliers = 1;
-end
-if not(exist('flag_premature','var'))
-    flag_premature = 0;
-end
-
 phases = {'Phase1','Phase2'};
-mo_classes = {'movement onset','mo online'};
+mo_class = {'movement onset','mo online'};
 
 cnt = cell(2,1);
 mrk = cell(2,1);
 trial = cell(2,1);
 for jj = 1:2
-    fprintf('Loading and preprocessing dataset %s/%s...\n',subj_code,phases{jj})
+    
+    fprintf('Loading and processing dataset %s/%s...\n',subj_code,phases{jj})
+    
     [mrk{jj},trial{jj}] = rfb_analyzeTrials(subj_code,phases{jj});
     [~,cnt{jj},mnt] = rfb_loadData(subj_code,phases{jj});
-    trial{jj} = rfb_getAccelVars(mrk{jj},trial{jj},cnt{jj},mo_classes{jj});
-    if flag_outliers
-        trial{jj} = rfb_flagOutliers(trial{jj});
-        trial{jj} = rfb_flagArtifacts(trial{jj},mrk{jj},cnt{jj},mo_classes{jj});
-    end
-    if flag_premature
-        ind_premature = trial{jj}.t_ts2mo<=-opt.cfy_rp.fv_window(1);
-        trial{jj}.valid = trial{jj}.valid&~ind_premature;
-        fprintf('%d trials with premature movements flagged\n',sum(ind_premature))
-    end
+    
+    trial{jj} = rfb_getAccelVars2(mrk{jj},trial{jj},cnt{jj},mo_class{jj});
+
 end
+
+if flag.bad_online_onset
+    ind = rfb_flagOnlineOnsets(trial,cnt,mrk);
+    trial{2}.valid = trial{2}.valid & ~ind;
+    fprintf('%d trials with bad online movement onset flagged\n',sum(ind))
+end
+
+for jj = 1:2
+    
+    if flag.duration_outlier
+        ind = isoutl(trial{jj}.t_mo2pp(trial{jj}.valid),'hi');
+        trial{jj}.valid(trial{jj}.valid)= ~ind;
+        fprintf('%d trials with outlier movement duration onset flagged\n',sum(ind))
+    end
+    
+    if flag.cout_outlier
+        ind = isoutl(trial{jj}.cout(trial{jj}.valid),'lohi');
+        trial{jj}.valid(trial{jj}.valid)= ~ind;
+        fprintf('%d trials with outlier classifier output flagged\n',sum(ind))
+    end
+        
+    if flag.premature
+        ind = trial{jj}.t_ts2mo<=-opt.cfy_rp.fv_window(1);
+        trial{jj}.valid = trial{jj}.valid & ~ind;
+        fprintf('%d trials with premature movements flagged\n',sum(ind))
+    end
+    
+    if flag.eeg_artifact
+        mrk_ = mrk_selectClasses(mrk{jj},mo_class{jj});
+        epo = proc_segmentation(cnt{jj},mrk_,opt.cfy_rp.fv_window);
+        [~,ind] = proc_rejectArtifactsMaxMin(epo,150,'Clab',trial{jj}.clab);
+        trial{jj}.valid(ind) = false;
+        fprintf('%d trials with EEG artifacts flagged\n',length(ind))
+    end
+
+end
+
+

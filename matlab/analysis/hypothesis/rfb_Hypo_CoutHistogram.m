@@ -1,0 +1,85 @@
+
+variable = 'cout';
+
+%%
+
+Nt = [100 300];
+Np = 25;
+Nb1 = Nt(1)/Np;
+Nb = sum(Nt)/Np;
+
+C = zeros(Ns,Nb);
+for ii = 1:Ns
+    c = [trial{ii}{1}.(variable)(1:Nt(1));
+         trial{ii}{2}.(variable)(1:Nt(2))];
+    v = [trial{ii}{1}.valid(1:Nt(1));
+         trial{ii}{2}.valid(1:Nt(2))];
+    c(~v) = NaN;
+    c = (c-nanmean(c))/nanstd(c);
+    C(ii,:) = nanmean(reshape(c,Np,Nb));
+end
+
+mu = nanmean(C);
+se = nanstd(C)/sqrt(Ns);
+
+fig_init(25,10);
+hold on
+clrs = lines;
+H = bar(1:Nb1,mu(1:Nb1));
+H.FaceColor = clrs(1,:);
+errorbar(1:Nb1,mu(1:Nb1),se(1:Nb1),'k.')
+H = bar(Nb1+1:Nb,mu(Nb1+1:Nb));
+H.FaceColor = clrs(2,:);
+errorbar(Nb1+1:Nb,mu(Nb1+1:Nb),se(Nb1+1:Nb),'k.')
+set(gca,'xtick',1.5:1:Nb+1,'xticklabel',num2str((Np:Np:sum(Nt))'))
+set(gca,'xlim',[.25 Nb+.75],'box','on')
+
+%%
+
+Nt = [100 300];
+Np = 25;
+Nb1 = Nt(1)/Np;
+Nb = sum(Nt)/Np;
+
+C = zeros(sum(Nt),Ns);
+for ii = 1:Ns
+    c = [trial{ii}{1}.(variable)(1:Nt(1));
+         trial{ii}{2}.(variable)(1:Nt(2))];
+    v = [trial{ii}{1}.valid(1:Nt(1));
+         trial{ii}{2}.valid(1:Nt(2))];
+    c(~v) = NaN;
+    %C(:,ii) = (c-nanmean(c))/nanstd(c);
+    %C(:,ii) = c;
+end
+
+C = reshape(C,Np,Nb,Ns);
+C = permute(C,[1 3 2]);
+C = reshape(C,Np*Ns,Nb);
+
+mu = zeros(Nb,1);
+ci = zeros(Nb,2);
+for kk = 1:Nb
+    [mu(kk),~,ci(kk,:)] = normfit(C(~isnan(C(:,kk)),kk));
+end
+
+fig_init(25,10);
+hold on
+clrs = lines;
+H = bar(1:Nb1,mu(1:Nb1));
+H.FaceColor = clrs(1,:);
+errorbar(1:Nb1,mu(1:Nb1),ci(1:Nb1,1)-mu(1:Nb1),ci(1:Nb1,2)-mu(1:Nb1),'k.')
+H = bar(Nb1+1:Nb,mu(Nb1+1:Nb));
+H.FaceColor = clrs(2,:);
+errorbar(Nb1+1:Nb,mu(Nb1+1:Nb),ci(Nb1+1:Nb,1)-mu(Nb1+1:Nb),ci(Nb1+1:Nb,2)-mu(Nb1+1:Nb),'k.')
+set(gca,'xtick',1.5:1:Nb+1,'xticklabel',num2str((Np:Np:sum(Nt))'))
+set(gca,'xlim',[.25 Nb+.75],'box','on')
+
+
+
+
+
+
+
+
+
+

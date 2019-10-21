@@ -1,27 +1,30 @@
 
-subj_code = 'VPfbm';
+subj_code = 'VPfbz';
 
-%%
-phases = {'Phase1','Phase2'};
-mo_classes = {'movement onset','mo online'};
+flag.premature = 0;
+flag.duration_outlier = 1;
+flag.cout_outlier = 1;
+flag.eeg_artifact = 1;
+flag.bad_online_onset = 1;
+
 var_names = {'Classifier output (a.u.)',...
              'Waiting time (sec)',...
              'Movement duration (ms)'};
-clab_grid = {'F3-4','FC5-6','C5-6','CP5-6','P3-4'};
 
-%% get data and remove outliers
-[trial,mrk,cnt,mnt] = rfb_getData(subj_code,1,1);
+%% prepare dataset
+[trial,mrk,cnt,mnt] = rfb_getData(subj_code,flag);
 
 %% compare phases
 X = cell(3,2);
-for jj = 1:2
-    X{1,jj} = trial{jj}.cout(trial{jj}.valid);
-    X{2,jj} = trial{jj}.t_ts2mo(trial{jj}.valid)/1000;
-    X{3,jj} = trial{jj}.t_mo2pp(trial{jj}.valid);
-end
+X{1,1} = trial{1}.cout(trial{1}.valid);
+X{2,1} = trial{1}.t_ts2mo(trial{1}.valid)/1000;
+X{3,1} = trial{1}.t_mo2pp(trial{1}.valid);
+X{1,2} = trial{2}.cout(trial{2}.valid);
+X{2,2} = trial{2}.t_ts2mo(trial{2}.valid)/1000;
+X{3,2} = trial{2}.t_mo2pp(trial{2}.valid);
+
 pval = zeros(3,1);
 for jj = 1:3
-    %[~,pval(jj)] = ttest2(X{jj,1},X{jj,2});
     pval(jj) = ranksum(X{jj,1},X{jj,2});
 end
 
@@ -60,5 +63,19 @@ for jj = 1:3
     camroll(-90)
     
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

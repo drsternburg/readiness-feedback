@@ -82,6 +82,9 @@ switch phase_name
                 mrk_ = mrk_selectClasses(mrk_this,{'movement onset','pedal press'});
                 t_mo2pp_off = mrk_.time(logical(mrk_.y(2,:)))-mrk_.time(logical(mrk_.y(1,:)));
                 trial.t_mo2pp_off = cat(1,trial.t_mo2pp_off,t_mo2pp_off);
+            else
+                trial.t_ts2mo_off = cat(1,trial.t_ts2mo_off,NaN);
+                trial.t_mo2pp_off = cat(1,trial.t_mo2pp_off,NaN);
             end
             
         end
