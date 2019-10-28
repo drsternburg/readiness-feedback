@@ -3,8 +3,8 @@ clab_grid = {'F3-4','FC5-6','C5-6','CP5-6','P3-4'};
 mnts = mnt_adaptMontage(mnt,clab_grid);
 alph = .001;
 
-%topo_ivals = [-900 -600; -600 -300; -300 0];
-topo_ivals = [-1500 -1000; -1000 -500; -500 0];
+topo_ivals = [-900 -600; -600 -300; -300 0];
+%topo_ivals = [-1500 -1000; -1000 -500; -500 0];
 
 %% Compare RPs against flat
 ci = [2 4];
@@ -54,6 +54,27 @@ rfb_gridplot(erp_ga_,rsq_ga_,mnt)
 figure
 plot_scalpEvolution(rsq_ga_,mnt,topo_ivals,...
     defopt_scalp_r('ExtrapolateToZero',1,'CLim',clim,'ContourPolicy','withinrange'));
+
+%% Compare RPs
+ci = [2 4];
+erp = cell(Ns,1);
+rsq = cell(Ns,1);
+for ii = 1:Ns
+    epo_ = cell(2,1);
+    for jj = 1:2
+        epo_{jj} = proc_selectClasses(epo{ii},ci(jj));        
+    end
+    erp{ii} = proc_appendEpochs(epo_);
+    rsq{ii} = proc_rSquareSigned(erp{ii},'Stats',1);
+    erp{ii} = proc_average(erp{ii},'Stats',1);
+end
+
+%Average = 'arithmetic';
+Average = 'NWeighted';
+erp_ga = proc_grandAverage(erp,'Stats',1,'Average',Average);
+rsq_ga = proc_grandAverage(rsq,'Stats',1,'Average',Average);
+
+rfb_gridplot(erp_ga,rsq_ga,mnts)
 
 
 %% Compare difference

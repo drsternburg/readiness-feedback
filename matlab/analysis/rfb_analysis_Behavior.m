@@ -1,7 +1,7 @@
 
-subj_code = 'VPfbz';
+subj_code = 'VPfbn';
 
-flag.premature = 0;
+flag.premature = 1;
 flag.duration_outlier = 1;
 flag.cout_outlier = 1;
 flag.eeg_artifact = 1;

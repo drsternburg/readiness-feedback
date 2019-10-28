@@ -49,7 +49,8 @@ for ii = 1:Ns
     hold on
     plot(t,X1)
     plot(t,X2)
-    set(gca,'ylim',[0 1],'xlim',[-T T])
+    set(gca,'xlim',[0 T])
+    set(gca,'ylim',[0 1])
     grid on
 end
 

@@ -6,6 +6,7 @@ H = grid_plot(epo,mnt,'PlotStat','sem','ShrinkAxes',[.9 1.5]);
 if not(isempty(rsq))
     grid_addBars(rsq,'HScale',H.scale,'Height',1/7);
 end
+set(H.leg,'pos',[.42 .65 .15 .05])
 if nargin==4
     for jj = 1:length(H.chan)
         if any(strcmp(H.chan(jj).ax_title.String,clab_selected))
