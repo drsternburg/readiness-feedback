@@ -1,5 +1,5 @@
 
-variable = 't_mo2pp';
+variable = 'alpha';
 
 %%
 
@@ -62,7 +62,7 @@ for kk = 1:Nb
     [mu(kk),~,ci(kk,:)] = normfit(C(~isnan(C(:,kk)),kk));
 end
 
-ylim = [-.4 .4];
+ylim = [-1 1]*ceil(max(abs(ci(:)))*10)/10;
 
 fig_init(25,10);
 hold on
@@ -72,8 +72,8 @@ patch([0 4.5 4.5 0],[ylim(1) ylim(1) ylim(2) ylim(2)],clrs(1,:),...
     'FaceAlpha',.1,'linewidth',.01,'edgecolor',[1 1 1])
 patch([4.5 16.75 16.75 4.5],[ylim(1) ylim(1) ylim(2) ylim(2)],clrs(2,:),...
     'FaceAlpha',.1,'linewidth',.01,'edgecolor',[1 1 1])
-text(2.5,.3,'Phase I: No feedback','HorizontalAlignment','center')
-text(10.5,.3,'Phase II: Feedback','HorizontalAlignment','center')
+text(2.5,ylim(2)-.1,'Phase I: No feedback','HorizontalAlignment','center')
+text(10.5,ylim(2)-.1,'Phase II: Feedback','HorizontalAlignment','center')
 
 H = bar(1:Nb1,mu(1:Nb1));
 H.FaceColor = clrs(1,:);
@@ -90,7 +90,7 @@ xlabel('Trial Nr')
 ylabel('z-score')
 
 %%
-print(gcf,'-dpng',[FIG_DIR sprintf('Hist25_%s',variable)])
+%print(gcf,'-dpng',[FIG_DIR sprintf('Hist25_%s',variable)])
 
 
 

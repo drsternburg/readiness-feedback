@@ -1,5 +1,5 @@
 
-function T = standardizePredictors2(T,P)
+function T = standardizePredictors(T,P)
 
 Ns = length(unique(T.Subj));
 Np = length(P);

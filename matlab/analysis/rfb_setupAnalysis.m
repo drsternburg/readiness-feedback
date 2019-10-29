@@ -8,6 +8,8 @@ subjs_sel = setxor(subjs_all,subjs_excl);
 
 Ns = length(subjs_sel);
 
+peak_alpha = [12 10 10 11 10 11 11 11 9 10 11 11 10 11 10 10 8];
+
 flag.premature = 1;
 flag.duration_outlier = 0;
 flag.cout_outlier = 1;
