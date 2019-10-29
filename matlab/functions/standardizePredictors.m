@@ -1,11 +1,10 @@
 
-function Y = standardizePredictors(Y,pind)
+function T = standardizePredictors2(T,P)
 
-Ns = length(unique(Y(:,end)));
-Np = length(pind);
+Ns = length(unique(T.Subj));
+Np = length(P);
 for si = 1:Ns
-    sind = Y(:,end)==si;
     for pi = 1:Np
-        Y(sind,pind(pi)) = zscore(Y(sind,pind(pi)));
+        T.(P{pi})(T.Subj==si) = zscore(T.(P{pi})(T.Subj==si));
     end
 end
