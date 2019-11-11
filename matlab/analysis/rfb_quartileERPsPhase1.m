@@ -6,11 +6,10 @@ epoq = cell(Ns,Np);
 rsqq = cell(Ns,Np);
 for ii = 1:Ns
     
-    cout = trial{ii}{2}.cout(trial{ii}{2}.valid);
-    [~,si] = sort(cout);
+    cout = trial{ii}{1}.cout(trial{ii}{1}.valid);
     Nc = length(cout);
     
-    epo12 = proc_selectClasses(epo{ii},'RP Phase 2');
+    epo12 = proc_selectClasses(epo{ii},'RP Phase 1');
     epo12.className = {'RP'};
     
 %     cout = [trial{ii}{1}.cout(trial{ii}{1}.valid);...
@@ -25,7 +24,7 @@ for ii = 1:Ns
     
     edges = [1 round(Nc/Np*(1:Np))];
     for jj = 1:Np
-        epoq{ii,jj} = proc_selectEpochs(epo12,si(edges(jj):edges(jj+1)));
+        epoq{ii,jj} = proc_selectEpochs(epo12,edges(jj):edges(jj+1));
         epoq{ii,jj}.className = cname(jj);
         rsqq{ii,jj} = proc_rSquareSigned(epoq{ii,jj},'Stats',1);
         %epoq{ii,jj} = proc_average(epoq{ii,jj});

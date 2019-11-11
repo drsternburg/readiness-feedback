@@ -5,8 +5,10 @@ flag.cout_outlier = 1;
 flag.premature = 1;
 flag.eeg_artifact = 1;
 
-%opt.cfy_rp.fv_window = [-1510 0];
+%opt.cfy_rp.fv_window = [-1500 0];
 %opt.cfy_rp.ival_baseln = [-1500 -1400];
+
+opt.cfy_rp.fv_window = [-1000 500];
 
 epo = cell(Ns,1);
 trial = cell(Ns,1);
@@ -19,4 +21,4 @@ for ii = 1:Ns
     
 end
 
-save Hypo trial epo mnt
+%save Hypo trial epo mnt

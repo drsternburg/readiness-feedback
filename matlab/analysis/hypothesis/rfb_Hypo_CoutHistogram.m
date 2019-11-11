@@ -1,5 +1,5 @@
 
-variable = 'alpha';
+variable = 't_ts2mo';
 
 %%
 
