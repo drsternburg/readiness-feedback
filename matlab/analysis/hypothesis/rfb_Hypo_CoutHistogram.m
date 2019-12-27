@@ -86,6 +86,7 @@ errorbar(Nb1+1:Nb,mu(Nb1+1:Nb),ci(Nb1+1:Nb,1)-mu(Nb1+1:Nb),ci(Nb1+1:Nb,2)-mu(Nb1
 set(gca,'xtick',.5:1:Nb+1,'xticklabel',num2str((0:Np:sum(Nt))'))
 set(gca,'xlim',[.25 Nb+.75],'box','on')
 
+title("Alpha power")
 xlabel('Trial Nr')
 ylabel('z-score')
 

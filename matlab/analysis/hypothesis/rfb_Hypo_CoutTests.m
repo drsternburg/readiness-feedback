@@ -1,10 +1,38 @@
+%% Initial
+couts = cell(2);
+for ii = 1:Ns
+    for jj= 1:2
+        couts{jj} = vertcat(couts{jj}, trial{ii}{jj}.cout(trial{ii}{jj}.valid));
+    end
+end
+
+
+% group = [    ones(size(couts{1}));
+%          2 * ones(size(couts{2}))];
+%      
+% figure
+% boxplot([couts{1}; couts{2}],group,'whisker', 4);
+% set(gca,'XTickLabel',{'Phase I','Phase II'})
+
+figure 
+l1 = histogram(couts{1},'Normalization','pdf')
+hold on
+l2 = histogram(couts{2},'Normalization','pdf')
+xline(mean(couts{1}), 'Color', 'b', 'LineWidth', 1.3)
+xline(mean(couts{2}), 'Color', 'r', 'LineWidth', 1.3)
+[h, p] = ttest2(couts{1}, couts{2});
+xlabel("Classifier output")
+ylabel("Density")
+title('Distribution of classifier outputs between two phases (p = 0.001)')
+legend([l1,l2],{'Phase I' , 'Phase II'});
+
 
 %% test for randomness
 pval = zeros(Ns,2);
 for ii = 1:Ns
     for jj = 1:2
         C = trial{ii}{jj}.cout(trial{ii}{jj}.valid);
-        [~,pval(ii,jj)] = runstest(C);
+        [~,pval(ii,jj), stat] = runstest(C);
     end
 end
 disp(pval<.05)
@@ -34,7 +62,7 @@ disp(pval<.05)
 %% check cross-correlations
 T = 25;
 t = -T:T;
-scaling = 'coeff';
+scaling = 'coef';
 
 figure
 for ii = 1:Ns
@@ -47,12 +75,16 @@ for ii = 1:Ns
         
     subplot(4,5,ii)
     hold on
-    plot(t,X1)
-    plot(t,X2)
+    p1 = plot(t,X1);
+    p2 = plot(t,X2);
+    title(subjs_all{ii});
     set(gca,'xlim',[0 T])
     set(gca,'ylim',[0 1])
+    xlabel('Lags (trial)');
+    ylabel('Corr');
     grid on
 end
+hLegend = legend([p1, p2], {'Phase I', 'Phase II'});
 
 %% compare cross-correlation against randomly permuted samples
 T = 25;

@@ -13,6 +13,7 @@ clrs = lines;
 for ii = 1:Ns2
     
     trial = rfb_getData(subjs_all{ii},flag);
+    Nt = [size(trial{1}.cout, 1), size(trial{2}.cout, 1)];
     c1 = trial{1}.cout(1:Nt(1));
     c2 = trial{2}.cout(1:Nt(2));
     v1 = trial{1}.valid(1:Nt(1));

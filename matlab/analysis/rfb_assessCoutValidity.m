@@ -1,5 +1,50 @@
+%% Phase 1 only
+cname = {'RP Q1','RP Q2','RP Q3','RP Q4'};
+Np = 4;
+epoq = cell(Ns,Np);
+rsqq = cell(Ns,Np);
+for ii = 1:Ns
+    cout = trial{ii}{1}.cout(trial{ii}{1}.valid);
+%     [~,si] = sort(cout);
+    Nc = length(cout);
+    epo1 = proc_selectClasses(epo{ii},'RP Phase 1');
+    epo1.className = {'RP'};
+    epo1.y = ones(1,Nc);    
+    edges = [1 round(Nc/Np*(1:Np))];
+    for jj = 1:Np
+        epoq{ii,jj} = proc_selectEpochs(epo1, edges(jj):edges(jj+1));
+        epoq{ii,jj}.className = cname(jj);
+        rsqq{ii,jj} = proc_rSquareSigned(epoq{ii,jj},'Stats',1);
+        %epoq{ii,jj} = proc_average(epoq{ii,jj});
+        epoq{ii,jj} = proc_average(epoq{ii,jj},'Stats',1);
+    end
+end
 
-%%
+
+%% Phase 2 only
+cname = {'RP Q1','RP Q2','RP Q3','RP Q4'};
+Np = 4;
+epoq = cell(Ns,Np);
+rsqq = cell(Ns,Np);
+for ii = 1:Ns
+    cout = trial{ii}{2}.cout(trial{ii}{2}.valid);
+%     [~,si] = sort(cout);
+    Nc = length(cout);
+    epo1 = proc_selectClasses(epo{ii},'RP Phase 2');
+    epo1.className = {'RP'};
+    epo1.y = ones(1,Nc);    
+    edges = [1 round(Nc/Np*(1:Np))];
+    for jj = 1:Np
+        epoq{ii,jj} = proc_selectEpochs(epo1, edges(jj):edges(jj+1));
+        epoq{ii,jj}.className = cname(jj);
+        rsqq{ii,jj} = proc_rSquareSigned(epoq{ii,jj},'Stats',1);
+        %epoq{ii,jj} = proc_average(epoq{ii,jj});
+        epoq{ii,jj} = proc_average(epoq{ii,jj},'Stats',1);
+    end
+end
+
+
+%% Phase 1 and phase 2 together
 cname = {'RP Q1','RP Q2','RP Q3','RP Q4'};
 Np = 4;
 epoq = cell(Ns,Np);
@@ -7,7 +52,7 @@ rsqq = cell(Ns,Np);
 for ii = 1:Ns
     cout = [trial{ii}{1}.cout(trial{ii}{1}.valid);...
             trial{ii}{2}.cout(trial{ii}{2}.valid)];
-    [~,si] = sort(cout);
+%     [~,si] = sort(cout);
     Nc = length(cout);
     epo1 = proc_selectClasses(epo{ii},'RP Phase 1');
     epo2 = proc_selectClasses(epo{ii},'RP Phase 2');
@@ -16,7 +61,7 @@ for ii = 1:Ns
     epo12.y = ones(1,Nc);    
     edges = [1 round(Nc/Np*(1:Np))];
     for jj = 1:Np
-        epoq{ii,jj} = proc_selectEpochs(epo12,si(edges(jj):edges(jj+1)));
+        epoq{ii,jj} = proc_selectEpochs(epo12, edges(jj):edges(jj+1));
         epoq{ii,jj}.className = cname(jj);
         rsqq{ii,jj} = proc_rSquareSigned(epoq{ii,jj},'Stats',1);
         %epoq{ii,jj} = proc_average(epoq{ii,jj});
@@ -37,7 +82,7 @@ rsqq_ga = proc_appendEpochs(rsqq_ga);
 %%
 clab_grid = {'F3-4','FC5-6','C5-6','CP5-6','P3-4'};
 mnt2 = mnt_restrictMontage(mnt,clab_grid);
-rfb_gridplot(epoq_ga,[],mnt2);
+rfb_gridplot(epoq_ga,[],mnt);
 
 print(gcf,'-dpng',[FIG_DIR 'CoutValidity_QuartileERPs'])
 

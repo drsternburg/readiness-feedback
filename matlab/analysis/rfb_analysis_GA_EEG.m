@@ -9,14 +9,18 @@ clab_grid = {'F3-4','FC5-6','C5-6','CP5-6','P3-4'};
 alph = .01;
 
 %%
-epo = cell(Ns,1);
+epoq = cell(Ns,1);
 rsq = cell(Ns,1);
 for ii = 1:Ns
     
-    [trial,mrk,cnt,mnt] = rfb_getData(subjs_sel{ii},flag);
-    epo{ii} = rfb_extractEpochs(trial,mrk,cnt);
+%     [trial{ii},mrk,cnt,mnt] = rfb_getData(subjs_sel{ii},flag);
+%     epo{ii} = rfb_extractEpochs2(trial{ii},mrk,cnt);
+
+%     [trial,mrk,cnt,mnt] = rfb_getData(subjs_sel{ii},flag);
+%     epoq{ii} = rfb_extractEpochs2(trial,mrk,cnt);
+    
     rsq{ii} = proc_rSquareSigned(epo{ii},'Stats',1);
-    epo{ii} = proc_average(epo{ii},'Stats',1);
+    epoq{ii} = proc_average(epo{ii},'Stats',1);
     
 end
 mnt = mnt_adaptMontage(mnt,clab_grid);
@@ -25,7 +29,7 @@ mnt = mnt_adaptMontage(mnt,clab_grid);
 Average = 'arithmetic';
 %Average = 'NWeighted';
 %Average = 'INVVARweighted';
-epo_ga = proc_grandAverage(epo,'Stats',1,'Average',Average);
+epo_ga = proc_grandAverage(epoq,'Stats',1,'Average',Average);
 rsq_ga = proc_grandAverage(rsq,'Stats',1,'Average',Average);
 
 %% RP topology StageII
@@ -40,11 +44,11 @@ plot_scalpEvolution(rsq_ga_,mnt,[-900 -600; -600 -300; -300 0],defopt_scalp_r('E
 %% Compare RPs in StageI and StageII
 epo_ga_ = proc_selectClasses(epo_ga,[2 4]);
 rsq_ga_ = rsq_ga;
-rsq_ga_.x(rsq_ga_.p>alph) = 0;
-rsq_ga_ = proc_selectClasses(rsq_ga_,8);
+% rsq_ga_.x(rsq_ga_.p>alph) = 0;
+rsq_ga_ = proc_selectClasses(rsq_ga_,5);
 rfb_gridplot(epo_ga_,rsq_ga_,mnt)
 figure
-plot_scalpEvolution(rsq_ga_,mnt,[-900 -600; -600 -300; -300 0],defopt_scalp_r('ExtrapolateToZero',1));
+plot_scalpEvolution(epo_ga_,mnt,[-900 -600; -600 -300; -300 0],defopt_scalp_r('ExtrapolateToZero',1));
 
 %% Compare RPs StageII/1st tercile vs StageII/3rd tercile
 epo_ga_ = proc_selectClasses(epo_ga,[5 7]);
